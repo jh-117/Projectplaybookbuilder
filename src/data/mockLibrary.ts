@@ -1,0 +1,72 @@
+import { PlaybookEntry } from '../types';
+
+export const MOCK_LIBRARY: PlaybookEntry[] = [
+  {
+    id: 'lib-1',
+    title: 'Phishing Response Protocol',
+    industry: 'IT & Technology',
+    status: 'Approved',
+    dateCreated: 1672531200000,
+    lastUpdated: 1672531200000,
+    category: 'Security',
+    summary: 'Standard operating procedure for responding to reported phishing attacks targeting employees.',
+    rootCause: 'Lack of email filtering rules',
+    impact: 'Potential data breach',
+    recommendation: 'Update email gateway policies',
+    doList: ['Isolate affected accounts', 'Reset passwords immediately'],
+    dontList: ['Forward phishing email to others', 'Click links to verify'],
+    preventionChecklist: ['Conduct monthly phishing tests', 'Update spam filters'],
+    tags: ['Security', 'Phishing', 'Incident']
+  },
+  {
+    id: 'lib-2',
+    title: 'Quarterly Tax Filing Checklist',
+    industry: 'Finance & Banking',
+    status: 'Approved',
+    dateCreated: 1675209600000,
+    lastUpdated: 1675209600000,
+    category: 'Compliance',
+    summary: 'Ensuring all quarterly tax documents are filed correctly and on time.',
+    rootCause: 'Manual data entry errors',
+    impact: 'Penalties and fines',
+    recommendation: 'Automate data collection from ERP',
+    doList: ['Verify totals with ledger', 'Submit 3 days before deadline'],
+    dontList: ['Estimate figures', 'File without manager approval'],
+    preventionChecklist: ['Schedule review meetings', 'Update tax calendar'],
+    tags: ['Tax', 'Finance', 'Compliance']
+  },
+  {
+    id: 'lib-3',
+    title: 'Employee Onboarding Streamline',
+    industry: 'HR & Recruitment',
+    status: 'Approved',
+    dateCreated: 1677628800000,
+    lastUpdated: 1677628800000,
+    category: 'Process Improvement',
+    summary: 'Reducing the time to productivity for new hires through better pre-boarding.',
+    rootCause: 'Delayed equipment provisioning',
+    impact: 'Lost productivity in first week',
+    recommendation: 'Order equipment upon offer acceptance',
+    doList: ['Send welcome email early', 'Prepare desk beforehand'],
+    dontList: ['Wait for start date to order laptop', 'Forget building access card'],
+    preventionChecklist: ['Automate ticket creation', 'Create onboarding slack channel'],
+    tags: ['HR', 'Onboarding', 'Efficiency']
+  },
+   {
+    id: 'lib-4',
+    title: 'Site Safety Inspection',
+    industry: 'Construction',
+    status: 'Approved',
+    dateCreated: 1680307200000,
+    lastUpdated: 1680307200000,
+    category: 'Risk Management',
+    summary: 'Daily safety checklist for active construction zones.',
+    rootCause: 'Complacency with PPE',
+    impact: 'increased accident risk',
+    recommendation: 'Mandatory morning safety brief',
+    doList: ['Inspect scaffolding daily', 'Check all PPE'],
+    dontList: ['Skip checks for small jobs', 'Ignore weather warnings'],
+    preventionChecklist: ['Sign-off logs', 'Weekly safety audit'],
+    tags: ['Safety', 'Construction', 'OSHA']
+  }
+];
