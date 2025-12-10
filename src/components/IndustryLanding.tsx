@@ -40,9 +40,7 @@ export const IndustryLanding: React.FC<Props> = ({ onSelect }) => {
 
       <div className="max-w-6xl w-full z-10 space-y-12">
         <div className="text-center space-y-6 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-gray-200 shadow-sm text-sm font-medium text-gray-600 mb-4 animate-in fade-in slide-in-from-top-4 duration-700">
-           
-          </div>
+         
           <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
             Standardize your <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">lessons learned.</span>
