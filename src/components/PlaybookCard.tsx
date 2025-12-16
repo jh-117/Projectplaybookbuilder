@@ -135,27 +135,30 @@ Tags: ${entry.tags.join(', ')}`;
         allowTaint: true,
         logging: false,
         backgroundColor: '#ffffff',
-        foreignObjectRendering: false,
         onclone: (clonedDoc) => {
-          const styleSheets = clonedDoc.styleSheets;
-          for (let i = 0; i < styleSheets.length; i++) {
-            try {
-              const sheet = styleSheets[i];
-              if (sheet.cssRules) {
-                for (let j = sheet.cssRules.length - 1; j >= 0; j--) {
-                  try {
-                    const rule = sheet.cssRules[j];
-                    if (rule instanceof CSSStyleRule && rule.cssText.includes('oklch')) {
-                      sheet.deleteRule(j);
-                    }
-                  } catch (e) {
-                  }
+          // Replace all oklch colors with RGB equivalents
+          const allElements = clonedDoc.querySelectorAll('*');
+          allElements.forEach((element) => {
+            if (element instanceof HTMLElement) {
+              const computed = window.getComputedStyle(element);
+              const props = ['color', 'backgroundColor', 'borderColor', 'borderTopColor', 'borderBottomColor', 'borderLeftColor', 'borderRightColor'];
+              
+              props.forEach(prop => {
+                const value = computed.getPropertyValue(prop);
+                if (value && value.includes('oklch')) {
+                  // Get the actual computed RGB value
+                  const tempDiv = document.createElement('div');
+                  tempDiv.style[prop as any] = value;
+                  document.body.appendChild(tempDiv);
+                  const rgbValue = window.getComputedStyle(tempDiv).getPropertyValue(prop);
+                  document.body.removeChild(tempDiv);
+                  element.style[prop as any] = rgbValue;
                 }
-              }
-            } catch (e) {
+              });
             }
-          }
-
+          });
+        },
+      });
           const clonedElement = clonedDoc.querySelector('[data-slot="card"]');
           if (clonedElement instanceof HTMLElement) {
             const inlineComputedStyles = (element: HTMLElement) => {
