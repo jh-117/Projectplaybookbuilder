@@ -344,12 +344,12 @@ Tags: ${entry.tags.join(', ')}`;
               {copySuccess ? (
                 <>
                   <CheckCircle2 className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Copied!</span>
+                  <span>Copied!</span>
                 </>
               ) : (
                 <>
                   <Copy className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Copy</span>
+                  <span>Copy</span>
                 </>
               )}
             </Button>
@@ -360,7 +360,7 @@ Tags: ${entry.tags.join(', ')}`;
               onClick={handleShare}
             >
               <Share2 className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Share</span>
+              <span>Share</span>
             </Button>
             <Button
               variant="outline"
@@ -369,7 +369,7 @@ Tags: ${entry.tags.join(', ')}`;
               onClick={handleExport}
             >
               <Download className="w-4 h-4 mr-2" />
-              Export
+              <span>Export</span>
             </Button>
           </div>
         </div>

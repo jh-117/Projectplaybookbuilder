@@ -6,12 +6,13 @@ import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Card } from './ui/card';
-import { Loader2, Wand2, Save, FileText, AlertTriangle, ArrowRight, ChevronRight, Check, Sparkles } from 'lucide-react';
+import { Loader2, Wand2, Save, FileText, AlertTriangle, ArrowRight, ChevronRight, Check, Sparkles, X } from 'lucide-react';
 import { PlaybookCard } from './PlaybookCard';
 import { toast } from 'sonner';
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -328,6 +329,10 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
 
       <AlertDialog open={errorDialog.open} onOpenChange={(open) => setErrorDialog({ ...errorDialog, open })}>
         <AlertDialogContent className="max-w-md">
+          <AlertDialogCancel className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-gray-100 border-0 h-6 w-6 p-0">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </AlertDialogCancel>
           <AlertDialogHeader>
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
               <AlertTriangle className="h-6 w-6 text-red-600" />
