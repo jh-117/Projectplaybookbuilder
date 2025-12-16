@@ -142,28 +142,26 @@ Tags: ${entry.tags.join(', ')}`;
     }
 
     setIsExporting(true);
-    toast.info('Opening print dialog...');
+    toast.info('Preparing PDF export...');
 
     try {
-      // Clone the preview DOM using outerHTML
       const clonedHTML = cardRef.current.outerHTML;
 
-      // Create a hidden iframe
       const iframe = document.createElement('iframe');
-      iframe.style.position = 'fixed';
-      iframe.style.top = '-9999px';
-      iframe.style.left = '-9999px';
-      iframe.style.width = '210mm'; // A4 width
-      iframe.style.height = '297mm'; // A4 height
+      iframe.style.position = 'absolute';
+      iframe.style.top = '-10000px';
+      iframe.style.left = '-10000px';
+      iframe.style.width = '210mm';
+      iframe.style.height = '297mm';
+      iframe.style.opacity = '0';
+      iframe.style.pointerEvents = 'none';
       document.body.appendChild(iframe);
 
-      // Wait for iframe to be ready
       await new Promise<void>((resolve) => {
-        iframe.onload = () => resolve();
-        if (!iframe.contentDocument) {
-          iframe.onload = () => resolve();
-        } else {
+        if (iframe.contentDocument) {
           resolve();
+        } else {
+          iframe.onload = () => resolve();
         }
       });
 
@@ -172,29 +170,24 @@ Tags: ${entry.tags.join(', ')}`;
         throw new Error('Failed to access iframe document');
       }
 
-      // Collect all stylesheets from the main document
       const styleSheets = Array.from(document.styleSheets);
       let allStyles = '';
 
       styleSheets.forEach((sheet) => {
         try {
           if (sheet.href) {
-            // External stylesheet - create link tag
             allStyles += `<link rel="stylesheet" href="${sheet.href}">`;
           } else if (sheet.cssRules) {
-            // Inline stylesheet - extract rules
             const rules = Array.from(sheet.cssRules)
               .map((rule) => rule.cssText)
               .join('\n');
             allStyles += `<style>${rules}</style>`;
           }
         } catch (e) {
-          // Skip stylesheets we can't access (CORS)
           console.warn('Could not access stylesheet:', e);
         }
       });
 
-      // Add print CSS for exact color printing
       const printCSS = `
         <style>
           @media print {
@@ -205,6 +198,7 @@ Tags: ${entry.tags.join(', ')}`;
             body {
               margin: 0;
               padding: 20px;
+              background: white;
             }
             button {
               display: none !important;
@@ -213,7 +207,6 @@ Tags: ${entry.tags.join(', ')}`;
         </style>
       `;
 
-      // Build the complete HTML document for the iframe
       iframeDoc.open();
       iframeDoc.write(`
         <!DOCTYPE html>
@@ -231,19 +224,27 @@ Tags: ${entry.tags.join(', ')}`;
       `);
       iframeDoc.close();
 
-      // Wait for styles and images to load
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 800));
 
-      // Trigger print dialog
-      iframe.contentWindow?.print();
+      if (iframe.contentWindow) {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+      }
 
-      // Clean up: remove iframe after print dialog closes
-      // Use a longer delay to ensure print dialog has time to render
+      toast.success('Print dialog opened! Please check your Downloads folder after saving the PDF.', {
+        duration: 6000,
+      });
+
       setTimeout(() => {
-        document.body.removeChild(iframe);
-      }, 1000);
+        try {
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+          }
+        } catch (e) {
+          console.warn('Cleanup warning:', e);
+        }
+      }, 2000);
 
-      toast.success('Print dialog opened!');
     } catch (err) {
       console.error('Failed to export:', err);
       toast.error('Failed to open print dialog');
@@ -261,19 +262,13 @@ Tags: ${entry.tags.join(', ')}`;
   return (
     <div className="group relative">
       {/* Decorative background blur */}
-      <div className={cn(
-        "gradient-ignore absolute -inset-0.5 rounded-2xl transition duration-500 blur-lg",
-        isExporting ? "bg-white opacity-0" : "bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-20"
-      )} />
+      <div className="gradient-ignore absolute -inset-0.5 rounded-2xl transition duration-500 blur-lg bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-20" />
 
       <div ref={cardRef}>
         <Card className="relative overflow-hidden border border-gray-200 shadow-xl shadow-gray-200/50 rounded-xl bg-white animate-in fade-in slide-in-from-bottom-4 duration-500">
 
         {/* Top Status Bar */}
-        <div className={cn(
-          "h-1.5 w-full",
-          isExporting ? "bg-indigo-600" : "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
-        )} />
+        <div className="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
 
         {/* Header Section */}
         <div className="p-6 md:p-8 border-b border-gray-100 bg-white">
