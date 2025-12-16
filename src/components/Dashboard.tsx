@@ -3,7 +3,7 @@ import { PlaybookEntry, Industry } from '../types';
 import { PlaybookCard } from './PlaybookCard';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Search, Sparkles, Clock, ArrowRight, TrendingUp, ShieldCheck } from 'lucide-react';
+import { Search, Sparkles, Clock, ArrowRight, TrendingUp, ShieldCheck, Filter } from 'lucide-react';
 import { cn } from './ui/utils';
 
 interface Props {
