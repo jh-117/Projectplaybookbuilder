@@ -159,21 +159,6 @@ Tags: ${entry.tags.join(', ')}`;
           });
         },
       });
-          const clonedElement = clonedDoc.querySelector('[data-slot="card"]');
-          if (clonedElement instanceof HTMLElement) {
-            const inlineComputedStyles = (element: HTMLElement) => {
-              const computed = window.getComputedStyle(element);
-              element.style.cssText = computed.cssText;
-              Array.from(element.children).forEach((child) => {
-                if (child instanceof HTMLElement) {
-                  inlineComputedStyles(child);
-                }
-              });
-            };
-            inlineComputedStyles(clonedElement);
-          }
-        },
-      });
 
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
