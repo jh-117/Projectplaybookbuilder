@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { CheckCircle2, XCircle, AlertTriangle, FileText, Share2, Copy, Edit2, Download, Save, X, Lightbulb, ShieldAlert, ArrowRight } from 'lucide-react';
 import { cn } from './ui/utils';
+import { toast } from 'sonner';
 
 interface Props {
   entry: PlaybookEntry;
@@ -17,6 +18,7 @@ interface Props {
 export const PlaybookCard: React.FC<Props> = ({ entry, onEdit, onStatusChange, onSave, readOnly = false }) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [editedEntry, setEditedEntry] = React.useState(entry);
+  const [copySuccess, setCopySuccess] = React.useState(false);
 
   // Update internal state when prop changes, unless currently editing
   React.useEffect(() => {
@@ -39,6 +41,89 @@ export const PlaybookCard: React.FC<Props> = ({ entry, onEdit, onStatusChange, o
   const handleCancel = () => {
     setIsEditing(false);
     setEditedEntry(entry);
+  };
+
+  const formatPlaybookText = () => {
+    return `# ${entry.title}
+
+**Industry:** ${entry.industry}
+**Category:** ${entry.category}
+**Status:** ${entry.status}
+**Last Updated:** ${new Date(entry.lastUpdated).toLocaleDateString()}
+
+## What Happened
+${entry.summary}
+
+## Root Cause Analysis
+${entry.rootCause}
+
+## Strategic Recommendation
+${entry.recommendation}
+
+## Recommended Actions
+${entry.doList.map((item, i) => `${i + 1}. ${item}`).join('\n')}
+
+## Avoid These Pitfalls
+${entry.dontList.map((item, i) => `${i + 1}. ${item}`).join('\n')}
+
+## Prevention Protocol
+${entry.preventionChecklist.map((item, i) => `☐ ${item}`).join('\n')}
+
+---
+Tags: ${entry.tags.join(', ')}`;
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(formatPlaybookText());
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+      toast.success('Playbook copied to clipboard!');
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      toast.error('Failed to copy to clipboard');
+    }
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: `Playbook: ${entry.title}`,
+      text: formatPlaybookText(),
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        toast.success('Playbook shared successfully!');
+      } else {
+        await navigator.clipboard.writeText(formatPlaybookText());
+        toast.info('Content copied to clipboard (Share not supported on this device)');
+      }
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') {
+        console.error('Error sharing:', err);
+        toast.error('Failed to share playbook');
+      }
+    }
+  };
+
+  const handleExport = () => {
+    try {
+      const content = formatPlaybookText();
+      const blob = new Blob([content], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `playbook-${entry.title.toLowerCase().replace(/\s+/g, '-')}.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('Playbook exported successfully!');
+    } catch (err) {
+      console.error('Failed to export:', err);
+      toast.error('Failed to export playbook');
+    }
   };
 
   return (
@@ -247,15 +332,42 @@ export const PlaybookCard: React.FC<Props> = ({ entry, onEdit, onStatusChange, o
             ))}
           </div>
           <div className="flex gap-2 w-full sm:w-auto justify-end">
-            <Button variant="ghost" size="sm" className="text-gray-500 hover:text-indigo-600 hover:bg-indigo-50">
-              <Copy className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Copy</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all",
+                copySuccess && "text-emerald-600 bg-emerald-50"
+              )}
+              onClick={handleCopy}
+            >
+              {copySuccess ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Copy</span>
+                </>
+              )}
             </Button>
-            <Button variant="ghost" size="sm" className="text-gray-500 hover:text-amber-600 hover:bg-amber-50">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-500 hover:text-amber-600 hover:bg-amber-50"
+              onClick={handleShare}
+            >
               <Share2 className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Share</span>
             </Button>
-            <Button variant="outline" size="sm" className="text-indigo-600 border-indigo-200 hover:bg-indigo-50">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+              onClick={handleExport}
+            >
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>

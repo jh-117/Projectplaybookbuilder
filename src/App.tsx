@@ -11,6 +11,7 @@ import { MOCK_LIBRARY } from './data/mockLibrary';
 import { PlaybookEntry, Industry } from './types';
 import { Button } from './components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { Toaster } from 'sonner';
 
 type View = 'dashboard' | 'new' | 'library' | 'my-entries' | 'view-entry';
 
@@ -58,12 +59,14 @@ export default function App() {
   const libraryEntries = [...entries, ...MOCK_LIBRARY];
 
   return (
-    <Layout
-      currentIndustry={selectedIndustry}
-      onIndustryChange={setSelectedIndustry}
-      currentView={currentView === 'view-entry' ? 'dashboard' : currentView} // Highlight dashboard if viewing entry, or handle separately
-      onNavigate={handleNavigate}
-    >
+    <>
+      <Toaster position="top-right" richColors />
+      <Layout
+        currentIndustry={selectedIndustry}
+        onIndustryChange={setSelectedIndustry}
+        currentView={currentView === 'view-entry' ? 'dashboard' : currentView}
+        onNavigate={handleNavigate}
+      >
       {currentView === 'dashboard' && (
         <Dashboard
           industry={selectedIndustry}
@@ -130,6 +133,7 @@ export default function App() {
           />
         </div>
       )}
-    </Layout>
+      </Layout>
+    </>
   );
 }
