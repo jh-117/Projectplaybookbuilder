@@ -345,7 +345,7 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
           <AlertDialogFooter className="sm:justify-center">
             <AlertDialogAction
               onClick={() => setErrorDialog({ ...errorDialog, open: false })}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8"
+              className="bg-blue-600 hover:bg-blue-700 text-black px-8"
             >
               Got it
             </AlertDialogAction>
