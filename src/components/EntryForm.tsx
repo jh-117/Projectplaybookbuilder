@@ -298,23 +298,25 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
                   <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-violet-600 to-blue-600 rounded-full opacity-70 group-hover/wrapper:opacity-100 blur-lg group-hover/wrapper:blur-xl transition-all duration-500 animate-pulse"></div>
 
                   <Button
-                    onClick={generateCard}
-                    disabled={loading || !formData.title || !formData.summary || (formData.category === 'Other' && !formData.customCategory)}
-                    className="
-                      relative
-                      bg-gradient-to-r from-blue-600 via-violet-600 to-blue-600
-                      hover:from-blue-700 hover:via-violet-700 hover:to-blue-700
-                      text-white
-                      min-w-[280px] h-16 rounded-full
-                      shadow-2xl shadow-blue-500/50
-                      text-lg font-bold tracking-wide
-                      transition-all duration-300
-                      hover:scale-105 hover:shadow-blue-600/60
-                      disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed
-                      group overflow-hidden
-                      border-2 border-white/20
-                    "
-                  >
+  onClick={generateCard}
+  disabled={loading || !formData.title || !formData.summary || (formData.category === 'Other' && !formData.customCategory)}
+  className="
+    relative
+    bg-white
+    hover:bg-gradient-to-r hover:from-blue-600 hover:via-violet-600 hover:to-blue-600
+    hover:from-blue-700 hover:via-violet-700 hover:to-blue-700
+    text-black
+    hover:text-white
+    min-w-[280px] h-16 rounded-full
+    shadow-2xl shadow-blue-500/50
+    text-lg font-bold tracking-wide
+    transition-all duration-300
+    hover:scale-105 hover:shadow-blue-600/60
+    disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed
+    group overflow-hidden
+    border-2 border-gray-200 hover:border-white/20
+  "
+>
                     {/* Animated gradient overlay */}
                     <span className="
                       absolute inset-0
