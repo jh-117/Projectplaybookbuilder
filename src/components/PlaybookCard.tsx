@@ -231,26 +231,13 @@ Tags: ${entry.tags.join(', ')}`;
 
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      let printCompleted = false;
-
-      const afterPrintHandler = () => {
-        printCompleted = true;
-        toast.success('PDF saved! Please check your Downloads folder.', {
-          duration: 5000,
-        });
-      };
-
       if (iframe.contentWindow) {
-        iframe.contentWindow.addEventListener('afterprint', afterPrintHandler);
         iframe.contentWindow.focus();
         iframe.contentWindow.print();
       }
 
       setTimeout(() => {
         try {
-          if (iframe.contentWindow) {
-            iframe.contentWindow.removeEventListener('afterprint', afterPrintHandler);
-          }
           if (document.body.contains(iframe)) {
             document.body.removeChild(iframe);
           }
