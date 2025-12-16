@@ -142,7 +142,6 @@ Tags: ${entry.tags.join(', ')}`;
     }
 
     setIsExporting(true);
-    toast.info('Preparing PDF export...');
 
     try {
       const clonedHTML = cardRef.current.outerHTML;
@@ -226,29 +225,38 @@ Tags: ${entry.tags.join(', ')}`;
 
       await new Promise(resolve => setTimeout(resolve, 800));
 
+      let printCompleted = false;
+
+      const afterPrintHandler = () => {
+        printCompleted = true;
+        toast.success('PDF saved! Please check your Downloads folder.', {
+          duration: 5000,
+        });
+      };
+
       if (iframe.contentWindow) {
+        iframe.contentWindow.addEventListener('afterprint', afterPrintHandler);
         iframe.contentWindow.focus();
         iframe.contentWindow.print();
       }
 
-      toast.success('Print dialog opened! Please check your Downloads folder after saving the PDF.', {
-        duration: 6000,
-      });
-
       setTimeout(() => {
         try {
+          if (iframe.contentWindow) {
+            iframe.contentWindow.removeEventListener('afterprint', afterPrintHandler);
+          }
           if (document.body.contains(iframe)) {
             document.body.removeChild(iframe);
           }
         } catch (e) {
           console.warn('Cleanup warning:', e);
         }
-      }, 2000);
+        setIsExporting(false);
+      }, 3000);
 
     } catch (err) {
       console.error('Failed to export:', err);
       toast.error('Failed to open print dialog');
-    } finally {
       setIsExporting(false);
     }
   };
