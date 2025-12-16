@@ -304,7 +304,7 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
                       relative
                       bg-gradient-to-r from-blue-600 via-violet-600 to-blue-600
                       hover:from-blue-700 hover:via-violet-700 hover:to-blue-700
-                      text-black group-hover:text-white
+                      text-white
                       min-w-[280px] h-16 rounded-full
                       shadow-2xl shadow-blue-500/50
                       text-lg font-bold tracking-wide
@@ -329,7 +329,7 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
                     <span className="absolute top-4 right-20 w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
 
                     {/* Button content */}
-                    <span className="relative z-10 flex items-center justify-center gap-2 text-white group-hover:text-black transition-colors duration-300">
+                   <span className="relative z-10 flex items-center justify-center gap-2 text-black group-hover:text-white transition-colors duration-300">
                       <Sparkles className="w-5 h-5 animate-pulse group-hover:rotate-12 transition-transform duration-300" />
                       <span className="font-extrabold">
                         Generate Playbook with AI
