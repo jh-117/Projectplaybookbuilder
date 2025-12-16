@@ -145,49 +145,12 @@ Tags: ${entry.tags.join(', ')}`;
     toast.info('Generating PDF...');
 
     try {
-      // Get all computed styles from the original document first
-      const originalElements = cardRef.current.querySelectorAll('*');
-      const computedStyles = new Map();
-      
-      originalElements.forEach((element) => {
-        if (element instanceof HTMLElement) {
-          const computed = window.getComputedStyle(element);
-          computedStyles.set(element, {
-            color: computed.color,
-            backgroundColor: computed.backgroundColor,
-            borderColor: computed.borderColor,
-            borderTopColor: computed.borderTopColor,
-            borderRightColor: computed.borderRightColor,
-            borderBottomColor: computed.borderBottomColor,
-            borderLeftColor: computed.borderLeftColor,
-          });
-        }
-      });
-
       const canvas = await html2canvas(cardRef.current, {
         scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
         backgroundColor: '#ffffff',
-        onclone: (clonedDoc) => {
-          const clonedElements = clonedDoc.querySelectorAll('*');
-          const originalElementsArray = Array.from(originalElements);
-          
-          clonedElements.forEach((clonedElement, index) => {
-            if (clonedElement instanceof HTMLElement) {
-              const originalElement = originalElementsArray[index];
-              const styles = computedStyles.get(originalElement);
-              
-              if (styles) {
-                Object.entries(styles).forEach(([prop, value]) => {
-                  if (value) {
-                    clonedElement.style[prop as any] = value;
-                  }
-                });
-              }
-            }
-          });
+        logging: false,
+        ignoreElements: (el) => {
+          return el.classList?.contains('gradient-ignore');
         },
       });
 
@@ -219,12 +182,19 @@ Tags: ${entry.tags.join(', ')}`;
   return (
     <div className="group relative">
       {/* Decorative background blur */}
-      <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl opacity-0 group-hover:opacity-20 transition duration-500 blur-lg" />
+      <div className={cn(
+        "gradient-ignore absolute -inset-0.5 rounded-2xl transition duration-500 blur-lg",
+        isExporting ? "bg-white opacity-0" : "bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-20"
+      )} />
 
-      <Card ref={cardRef} className="relative overflow-hidden border border-gray-200 shadow-xl shadow-gray-200/50 rounded-xl bg-white animate-in fade-in slide-in-from-bottom-4 duration-500">
-        
+      <div ref={cardRef}>
+        <Card className="relative overflow-hidden border border-gray-200 shadow-xl shadow-gray-200/50 rounded-xl bg-white animate-in fade-in slide-in-from-bottom-4 duration-500">
+
         {/* Top Status Bar */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
+        <div className={cn(
+          "h-1.5 w-full",
+          isExporting ? "bg-indigo-600" : "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
+        )} />
 
         {/* Header Section */}
         <div className="p-6 md:p-8 border-b border-gray-100 bg-white">
@@ -486,7 +456,8 @@ Tags: ${entry.tags.join(', ')}`;
             </Button>
           </div>
         </div>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 };

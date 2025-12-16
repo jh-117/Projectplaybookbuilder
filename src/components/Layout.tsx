@@ -3,7 +3,7 @@ import { Industry, INDUSTRIES } from '../types';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { LayoutDashboard, PlusCircle, BookOpen, User, Menu, X } from 'lucide-react';
-import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from './ui/sheet';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -95,6 +95,10 @@ export const Layout: React.FC<LayoutProps> = ({
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                <SheetDescription className="sr-only">
+                  Access navigation links and settings
+                </SheetDescription>
                 <div className="flex flex-col gap-6 py-6">
                   <div className="space-y-4">
                     <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Navigation</h3>
