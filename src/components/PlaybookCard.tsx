@@ -6,7 +6,7 @@ import { Card } from './ui/card';
 import { CheckCircle2, XCircle, AlertTriangle, FileText, Share2, Copy, Edit2, Download, Save, X, Lightbulb, ShieldAlert, ArrowRight, Globe, Lock } from 'lucide-react';
 import { cn } from './ui/utils';
 import { toast } from 'sonner';
-import { toPng as htmlToImage } from 'html-to-image';
+import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 interface Props {
@@ -129,44 +129,63 @@ Tags: ${entry.tags.join(', ')}`;
     toast.info('Generating PDF...');
 
     try {
-      // Use html-to-image to generate a PNG from the DOM element
-      const dataUrl = await htmlToImage(cardRef.current, {
+      const canvas = await html2canvas(cardRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
         backgroundColor: '#ffffff',
-        quality: 1.0,
-        pixelRatio: 2,
-        filter: (node) => {
-          // Remove any inline oklab/oklch styles that might exist
-          if (node instanceof HTMLElement && node.style) {
-            const style = node.style.cssText;
-            if (style && (style.includes('oklab') || style.includes('oklch'))) {
-              node.style.cssText = style.replace(/oklab[^;]+;?|oklch[^;]+;?/g, '');
+        foreignObjectRendering: false,
+        onclone: (clonedDoc) => {
+          const styleSheets = clonedDoc.styleSheets;
+          for (let i = 0; i < styleSheets.length; i++) {
+            try {
+              const sheet = styleSheets[i];
+              if (sheet.cssRules) {
+                for (let j = sheet.cssRules.length - 1; j >= 0; j--) {
+                  try {
+                    const rule = sheet.cssRules[j];
+                    if (rule instanceof CSSStyleRule && rule.cssText.includes('oklch')) {
+                      sheet.deleteRule(j);
+                    }
+                  } catch (e) {
+                  }
+                }
+              }
+            } catch (e) {
             }
           }
-          return true;
+
+          const clonedElement = clonedDoc.querySelector('[data-slot="card"]');
+          if (clonedElement instanceof HTMLElement) {
+            const inlineComputedStyles = (element: HTMLElement) => {
+              const computed = window.getComputedStyle(element);
+              element.style.cssText = computed.cssText;
+              Array.from(element.children).forEach((child) => {
+                if (child instanceof HTMLElement) {
+                  inlineComputedStyles(child);
+                }
+              });
+            };
+            inlineComputedStyles(clonedElement);
+          }
         },
       });
 
-      // Create an image element to get dimensions
-      const img = new Image();
-      await new Promise((resolve) => {
-        img.onload = resolve;
-        img.src = dataUrl;
-      });
-
-      // Create PDF with jsPDF
+      const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
-        orientation: img.width > img.height ? 'landscape' : 'portrait',
+        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
         unit: 'px',
-        format: [img.width, img.height],
+        format: [canvas.width, canvas.height],
       });
 
-      pdf.addImage(dataUrl, 'PNG', 0, 0, img.width, img.height);
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
       pdf.save(`playbook-${entry.title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
 
       toast.success('Playbook exported as PDF!');
     } catch (err) {
       console.error('Failed to export:', err);
-      toast.error('Failed to export playbook. Please try again.');
+      toast.error('Failed to export playbook');
     } finally {
       setIsExporting(false);
     }
