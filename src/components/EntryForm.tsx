@@ -291,6 +291,7 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
 
   {/* content */}
   <span className="relative z-10 flex items-center">
+    <span className="relative z-10 text-red-500">
     <Sparkles className="w-5 h-5 mr-2 animate-pulse" />
     Generate Playbook with AI
     <Wand2 className="w-5 h-5 ml-2" />
