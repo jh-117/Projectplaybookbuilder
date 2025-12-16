@@ -5,21 +5,24 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { cn } from './ui/utils';
 import { toast } from 'sonner';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
+  FileText,
   Share2,
   Copy,
   Edit2,
   Download,
+  Save,
+  X,
   Lightbulb,
   ShieldAlert,
+  ArrowRight,
   Globe,
-  Lock,
-  X as XIcon,
-  Plus,
-  X
+  Lock
 } from 'lucide-react';
 
 interface Props {
@@ -31,31 +34,14 @@ interface Props {
   readOnly?: boolean;
 }
 
-export const PlaybookCard: React.FC<Props> = ({ 
-  entry, 
-  onEdit, 
-  onStatusChange, 
-  onSave, 
-  onPublishToggle, 
-  readOnly = false 
-}) => {
+export const PlaybookCard: React.FC<Props> = ({ entry, onEdit, onStatusChange, onSave, onPublishToggle, readOnly = false }) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [editedEntry, setEditedEntry] = React.useState(entry);
   const [copySuccess, setCopySuccess] = React.useState(false);
   const [isExporting, setIsExporting] = React.useState(false);
-  const [showCancelExport, setShowCancelExport] = React.useState(false);
-  const exportTimeoutRef = React.useRef<NodeJS.Timeout>();
   const cardRef = React.useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
-    return () => {
-      // Cleanup timeout on unmount
-      if (exportTimeoutRef.current) {
-        clearTimeout(exportTimeoutRef.current);
-      }
-    };
-  }, []);
-
+  // Update internal state when prop changes, unless currently editing
   React.useEffect(() => {
     if (!isEditing) {
       setEditedEntry(entry);
@@ -76,26 +62,6 @@ export const PlaybookCard: React.FC<Props> = ({
   const handleCancel = () => {
     setIsEditing(false);
     setEditedEntry(entry);
-  };
-
-  const handleCancelExport = () => {
-    setIsExporting(false);
-    setShowCancelExport(false);
-    
-    // Clear any pending timeouts
-    if (exportTimeoutRef.current) {
-      clearTimeout(exportTimeoutRef.current);
-    }
-    
-    // Remove any existing iframes
-    const iframes = document.querySelectorAll('iframe[style*="-9999px"]');
-    iframes.forEach(iframe => {
-      if (iframe.parentNode) {
-        iframe.parentNode.removeChild(iframe);
-      }
-    });
-    
-    toast.info('PDF export cancelled');
   };
 
   const formatPlaybookText = () => {
@@ -176,14 +142,13 @@ Tags: ${entry.tags.join(', ')}`;
     }
 
     setIsExporting(true);
-    setShowCancelExport(true);
-    const loadingToast = toast.loading('Preparing PDF… Click Cancel if it takes too long.');
+    toast.info('Opening print dialog...');
 
     try {
-      // Clone the playbook card HTML
+      // Clone the preview DOM using outerHTML
       const clonedHTML = cardRef.current.outerHTML;
 
-      // Create a hidden iframe for printing
+      // Create a hidden iframe
       const iframe = document.createElement('iframe');
       iframe.style.position = 'fixed';
       iframe.style.top = '-9999px';
@@ -192,27 +157,44 @@ Tags: ${entry.tags.join(', ')}`;
       iframe.style.height = '297mm'; // A4 height
       document.body.appendChild(iframe);
 
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (!iframeDoc) throw new Error('Cannot access iframe document');
+      // Wait for iframe to be ready
+      await new Promise<void>((resolve) => {
+        iframe.onload = () => resolve();
+        if (!iframe.contentDocument) {
+          iframe.onload = () => resolve();
+        } else {
+          resolve();
+        }
+      });
 
-      // Collect all styles from main document
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iframeDoc) {
+        throw new Error('Failed to access iframe document');
+      }
+
+      // Collect all stylesheets from the main document
       const styleSheets = Array.from(document.styleSheets);
       let allStyles = '';
+
       styleSheets.forEach((sheet) => {
         try {
           if (sheet.href) {
+            // External stylesheet - create link tag
             allStyles += `<link rel="stylesheet" href="${sheet.href}">`;
           } else if (sheet.cssRules) {
+            // Inline stylesheet - extract rules
             const rules = Array.from(sheet.cssRules)
-              .map(rule => rule.cssText)
+              .map((rule) => rule.cssText)
               .join('\n');
             allStyles += `<style>${rules}</style>`;
           }
         } catch (e) {
+          // Skip stylesheets we can't access (CORS)
           console.warn('Could not access stylesheet:', e);
         }
       });
 
+      // Add print CSS for exact color printing
       const printCSS = `
         <style>
           @media print {
@@ -220,14 +202,18 @@ Tags: ${entry.tags.join(', ')}`;
               -webkit-print-color-adjust: exact !important;
               print-color-adjust: exact !important;
             }
-            body { margin: 0; padding: 20px; }
-            button { display: none !important; }
-            .print-hide { display: none !important; }
+            body {
+              margin: 0;
+              padding: 20px;
+            }
+            button {
+              display: none !important;
+            }
           }
         </style>
       `;
 
-      // Write iframe content
+      // Build the complete HTML document for the iframe
       iframeDoc.open();
       iframeDoc.write(`
         <!DOCTYPE html>
@@ -245,45 +231,24 @@ Tags: ${entry.tags.join(', ')}`;
       `);
       iframeDoc.close();
 
-      // Wait a short time to render styles/images
+      // Wait for styles and images to load
       await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Set up a timeout to auto-cancel after 30 seconds
-      exportTimeoutRef.current = setTimeout(() => {
-        if (isExporting) {
-          handleCancelExport();
-          toast.error('PDF export timed out. Please try again.');
-        }
-      }, 30000);
-
-      // Use onafterprint for UX feedback
-      const cleanup = () => {
-        toast.dismiss(loadingToast);
-        setIsExporting(false);
-        setShowCancelExport(false);
-        
-        if (exportTimeoutRef.current) {
-          clearTimeout(exportTimeoutRef.current);
-        }
-        
-        // Remove iframe
-        if (document.body.contains(iframe)) {
-          document.body.removeChild(iframe);
-        }
-      };
-
-      iframe.contentWindow?.addEventListener('afterprint', cleanup);
-      window.addEventListener('beforeunload', cleanup);
 
       // Trigger print dialog
       iframe.contentWindow?.print();
 
+      // Clean up: remove iframe after print dialog closes
+      // Use a longer delay to ensure print dialog has time to render
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+      }, 1000);
+
+      toast.success('Print dialog opened!');
     } catch (err) {
       console.error('Failed to export:', err);
-      toast.dismiss(loadingToast);
-      setIsExporting(false);
-      setShowCancelExport(false);
       toast.error('Failed to open print dialog');
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -304,104 +269,102 @@ Tags: ${entry.tags.join(', ')}`;
       <div ref={cardRef}>
         <Card className="relative overflow-hidden border border-gray-200 shadow-xl shadow-gray-200/50 rounded-xl bg-white animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-          {/* Top Status Bar */}
-          <div className={cn(
-            "h-1.5 w-full",
-            isExporting ? "bg-indigo-600" : "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
-          )} />
+        {/* Top Status Bar */}
+        <div className={cn(
+          "h-1.5 w-full",
+          isExporting ? "bg-indigo-600" : "bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
+        )} />
 
-          {/* Header Section */}
-          <div className="p-6 md:p-8 border-b border-gray-100 bg-white">
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="outline" className="text-indigo-700 border-indigo-100 bg-indigo-50/50 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
-                    {entry.industry}
-                  </Badge>
-                  <Badge className={cn("border px-3 py-1 text-xs font-semibold uppercase tracking-wide shadow-none", statusColors[entry.status])}>
-                    {entry.status}
-                  </Badge>
-                  <span className="text-xs font-medium text-gray-400 flex items-center gap-1">
-                    Last updated {new Date(entry.lastUpdated).toLocaleDateString()}
-                  </span>
-                </div>
+        {/* Header Section */}
+        <div className="p-6 md:p-8 border-b border-gray-100 bg-white">
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-2">
+                 <Badge variant="outline" className="text-indigo-700 border-indigo-100 bg-indigo-50/50 px-3 py-1 text-xs font-semibold uppercase tracking-wide">
+                  {entry.industry}
+                </Badge>
+                <Badge className={cn("border px-3 py-1 text-xs font-semibold uppercase tracking-wide shadow-none", statusColors[entry.status])}>
+                  {entry.status}
+                </Badge>
+                <span className="text-xs font-medium text-gray-400 flex items-center gap-1">
+                  Last updated {new Date(entry.lastUpdated).toLocaleDateString()}
+                </span>
+              </div>
 
-                {!readOnly && (
-                  <div className="flex items-center gap-2 self-start md:self-auto">
-                    {entry.status !== 'Approved' && !isEditing && (
-                      <Button 
-                        size="sm" 
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all"
-                        onClick={() => onStatusChange?.('Approved')}
-                      >
-                        <CheckCircle2 className="w-4 h-4 mr-2" />
-                        Approve
-                      </Button>
-                    )}
-                    
-                    {!isEditing ? (
+              {!readOnly && (
+                <div className="flex items-center gap-2 self-start md:self-auto">
+                  {entry.status !== 'Approved' && !isEditing && (
+                    <Button 
+                      size="sm" 
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all"
+                      onClick={() => onStatusChange?.('Approved')}
+                    >
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      Approve
+                    </Button>
+                  )}
+                  
+                  {!isEditing ? (
                       <Button variant="outline" size="sm" onClick={() => setIsEditing(true)} className="text-gray-600 hover:text-indigo-600 hover:border-indigo-200">
                         <Edit2 className="w-4 h-4 mr-2" />
                         Edit
                       </Button>
-                    ) : (
+                  ) : (
                       <div className="flex gap-2">
-                        <Button variant="ghost" size="sm" onClick={handleCancel} className="text-gray-500">
-                          Cancel
-                        </Button>
-                        <Button size="sm" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm" onClick={handleSave}>
-                          Save Changes
-                        </Button>
+                          <Button variant="ghost" size="sm" onClick={handleCancel} className="text-gray-500">
+                            Cancel
+                          </Button>
+                          <Button size="sm" className="bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm" onClick={handleSave}>
+                            Save Changes
+                          </Button>
                       </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div>
-                {isEditing ? (
-                  <input 
-                    className="text-3xl font-extrabold text-gray-900 w-full border-b border-gray-200 focus:border-indigo-500 focus:outline-none bg-transparent placeholder:text-gray-300 transition-colors"
-                    value={editedEntry.title}
-                    onChange={e => setEditedEntry({...editedEntry, title: e.target.value})}
-                    placeholder="Enter playbook title..."
-                  />
-                ) : (
-                  <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">{entry.title}</h1>
-                )}
-                <div className="mt-2 flex items-center gap-2 text-gray-500 font-medium">
-                  <span className="bg-gray-100 px-2 py-0.5 rounded text-xs uppercase tracking-wider text-gray-600">{entry.category}</span>
+                  )}
                 </div>
+              )}
+            </div>
+
+            <div>
+               {isEditing ? (
+                   <input 
+                      className="text-3xl font-extrabold text-gray-900 w-full border-b border-gray-200 focus:border-indigo-500 focus:outline-none bg-transparent placeholder:text-gray-300 transition-colors"
+                      value={editedEntry.title}
+                      onChange={e => setEditedEntry({...editedEntry, title: e.target.value})}
+                      placeholder="Enter playbook title..."
+                   />
+              ) : (
+                  <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight leading-tight">{entry.title}</h1>
+              )}
+              <div className="mt-2 flex items-center gap-2 text-gray-500 font-medium">
+                <span className="bg-gray-100 px-2 py-0.5 rounded text-xs uppercase tracking-wider text-gray-600">{entry.category}</span>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Main Content */}
-          <div className="p-6 md:p-8 space-y-8 bg-white">
-            {/* What Happened */}
-            <section className="relative">
-              <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-indigo-100" />
-              <div className="pl-6">
+        <div className="p-6 md:p-8 space-y-8 bg-white">
+          {/* Executive Summary */}
+          <section className="relative">
+             <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-indigo-100" />
+             <div className="pl-6">
                 <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
                   What Happened
                 </h3>
                 {isEditing ? (
                   <textarea 
-                    className="w-full min-h-[120px] p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none resize-y text-base leading-relaxed"
-                    value={editedEntry.summary}
-                    onChange={e => setEditedEntry({...editedEntry, summary: e.target.value})}
+                      className="w-full min-h-[120px] p-4 border border-gray-200 rounded-xl text-gray-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none resize-y text-base leading-relaxed"
+                      value={editedEntry.summary}
+                      onChange={e => setEditedEntry({...editedEntry, summary: e.target.value})}
                   />
                 ) : (
                   <p className="text-lg text-gray-600 leading-relaxed font-light">{entry.summary}</p>
                 )}
-              </div>
-            </section>
+             </div>
+          </section>
 
-            {/* Root Cause & Recommendation Grid */}
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Root Cause Analysis */}
-              <div className="group/card bg-gradient-to-br from-amber-50 to-[#FFFBF0] p-6 rounded-2xl border border-amber-100/50 shadow-sm hover:shadow-md transition-all">
-                <div className="flex items-start gap-4">
+          {/* Root Cause & Fix Grid */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="group/card bg-gradient-to-br from-amber-50 to-[#FFFBF0] p-6 rounded-2xl border border-amber-100/50 shadow-sm hover:shadow-md transition-all">
+               <div className="flex items-start gap-4">
                   <div className="p-2 bg-amber-100 text-amber-600 rounded-lg shrink-0">
                     <ShieldAlert className="w-5 h-5" />
                   </div>
@@ -409,354 +372,169 @@ Tags: ${entry.tags.join(', ')}`;
                     <h3 className="font-bold text-amber-900 mb-2">Root Cause Analysis</h3>
                     {isEditing ? (
                       <textarea 
-                        className="w-full bg-white/80 p-3 border border-amber-200/50 rounded-lg text-amber-900 focus:ring-2 focus:ring-amber-500/20 outline-none text-sm min-h-[100px]"
-                        value={editedEntry.rootCause}
-                        onChange={e => setEditedEntry({...editedEntry, rootCause: e.target.value})}
+                          className="w-full bg-white/80 p-3 border border-amber-200/50 rounded-lg text-amber-900 focus:ring-2 focus:ring-amber-500/20 outline-none text-sm min-h-[100px]"
+                          value={editedEntry.rootCause}
+                          onChange={e => setEditedEntry({...editedEntry, rootCause: e.target.value})}
                       />
                     ) : (
                       <p className="text-amber-800/80 leading-relaxed text-sm">{entry.rootCause}</p>
                     )}
                   </div>
-                </div>
-              </div>
+               </div>
+            </div>
 
-              {/* Strategic Recommendation */}
-              <div className="group/card bg-gradient-to-br from-indigo-50 to-[#F5F3FF] p-6 rounded-2xl border border-indigo-100/50 shadow-sm hover:shadow-md transition-all">
-                <div className="flex items-start gap-4">
+            <div className="group/card bg-gradient-to-br from-indigo-50 to-[#F5F3FF] p-6 rounded-2xl border border-indigo-100/50 shadow-sm hover:shadow-md transition-all">
+               <div className="flex items-start gap-4">
                   <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg shrink-0">
                     <Lightbulb className="w-5 h-5" />
                   </div>
                   <div className="w-full">
                     <h3 className="font-bold text-indigo-900 mb-2">Strategic Recommendation</h3>
-                    {isEditing ? (
+                     {isEditing ? (
                       <textarea 
-                        className="w-full bg-white/80 p-3 border border-indigo-200/50 rounded-lg text-indigo-900 focus:ring-2 focus:ring-indigo-500/20 outline-none text-sm min-h-[100px]"
-                        value={editedEntry.recommendation}
-                        onChange={e => setEditedEntry({...editedEntry, recommendation: e.target.value})}
+                          className="w-full bg-white/80 p-3 border border-indigo-200/50 rounded-lg text-indigo-900 focus:ring-2 focus:ring-indigo-500/20 outline-none text-sm min-h-[100px]"
+                          value={editedEntry.recommendation}
+                          onChange={e => setEditedEntry({...editedEntry, recommendation: e.target.value})}
                       />
                     ) : (
                       <p className="text-indigo-800/80 leading-relaxed text-sm">{entry.recommendation}</p>
                     )}
                   </div>
-                </div>
-              </div>
+               </div>
             </div>
+          </div>
 
-            {/* Do's and Don'ts */}
-            <div className="grid md:grid-cols-2 gap-8 pt-4">
-              {/* DO List */}
-              <section className="space-y-4">
-                <div className="flex items-center gap-3 pb-2 border-b-2 border-emerald-100">
-                  <div className="p-1.5 bg-emerald-100 rounded-full text-emerald-600">
-                    <CheckCircle2 className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-bold text-emerald-900">Recommended Actions</h3>
-                  {isEditing && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="ml-auto text-emerald-600 hover:text-emerald-700"
-                      onClick={() => setEditedEntry({
-                        ...editedEntry,
-                        doList: [...editedEntry.doList, '']
-                      })}
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  )}
+          {/* Do's and Don'ts */}
+          <div className="grid md:grid-cols-2 gap-8 pt-4">
+            {/* DO List */}
+            <section className="space-y-4">
+              <div className="flex items-center gap-3 pb-2 border-b-2 border-emerald-100">
+                <div className="p-1.5 bg-emerald-100 rounded-full text-emerald-600">
+                  <CheckCircle2 className="w-5 h-5" />
                 </div>
-                <ul className="space-y-3">
-                  {isEditing ? (
-                    editedEntry.doList.map((item, i) => (
-                      <li key={i} className="flex items-start gap-3 group/item">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0 group-hover/item:scale-125 transition-transform" />
-                        <input
-                          className="flex-1 p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                          value={item}
-                          onChange={e => {
-                            const newList = [...editedEntry.doList];
-                            newList[i] = e.target.value;
-                            setEditedEntry({...editedEntry, doList: newList});
-                          }}
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-gray-400 hover:text-red-600"
-                          onClick={() => {
-                            const newList = editedEntry.doList.filter((_, index) => index !== i);
-                            setEditedEntry({...editedEntry, doList: newList});
-                          }}
-                        >
-                          <XIcon className="w-4 h-4" />
-                        </Button>
-                      </li>
-                    ))
-                  ) : (
-                    entry.doList.map((item, i) => (
-                      <li key={i} className="flex items-start gap-3 group/item">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0 group-hover/item:scale-125 transition-transform" />
-                        <span className="text-gray-700 group-hover/item:text-gray-900 transition-colors">{item}</span>
-                      </li>
-                    ))
-                  )}
-                </ul>
-              </section>
+                <h3 className="font-bold text-emerald-900">Recommended Actions</h3>
+              </div>
+              <ul className="space-y-3">
+                {entry.doList.map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 group/item">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0 group-hover/item:scale-125 transition-transform" />
+                    <span className="text-gray-700 group-hover/item:text-gray-900 transition-colors">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
 
-              {/* DON'T List */}
-              <section className="space-y-4">
-                <div className="flex items-center gap-3 pb-2 border-b-2 border-rose-100">
-                  <div className="p-1.5 bg-rose-100 rounded-full text-rose-600">
-                    <XCircle className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-bold text-rose-900">Avoid These Pitfalls</h3>
-                  {isEditing && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="ml-auto text-rose-600 hover:text-rose-700"
-                      onClick={() => setEditedEntry({
-                        ...editedEntry,
-                        dontList: [...editedEntry.dontList, '']
-                      })}
-                    >
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  )}
+             {/* DON'T List */}
+            <section className="space-y-4">
+              <div className="flex items-center gap-3 pb-2 border-b-2 border-rose-100">
+                <div className="p-1.5 bg-rose-100 rounded-full text-rose-600">
+                  <XCircle className="w-5 h-5" />
                 </div>
-                <ul className="space-y-3">
-                  {isEditing ? (
-                    editedEntry.dontList.map((item, i) => (
-                      <li key={i} className="flex items-start gap-3 group/item">
-                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400 mt-2 shrink-0 group-hover/item:scale-125 transition-transform" />
-                        <input
-                          className="flex-1 p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
-                          value={item}
-                          onChange={e => {
-                            const newList = [...editedEntry.dontList];
-                            newList[i] = e.target.value;
-                            setEditedEntry({...editedEntry, dontList: newList});
-                          }}
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-gray-400 hover:text-red-600"
-                          onClick={() => {
-                            const newList = editedEntry.dontList.filter((_, index) => index !== i);
-                            setEditedEntry({...editedEntry, dontList: newList});
-                          }}
-                        >
-                          <XIcon className="w-4 h-4" />
-                        </Button>
-                      </li>
-                    ))
-                  ) : (
-                    entry.dontList.map((item, i) => (
-                      <li key={i} className="flex items-start gap-3 group/item">
-                        <span className="w-1.5 h-1.5 rounded-full bg-rose-400 mt-2 shrink-0 group-hover/item:scale-125 transition-transform" />
-                        <span className="text-gray-700 group-hover/item:text-gray-900 transition-colors">{item}</span>
-                      </li>
-                    ))
-                  )}
-                </ul>
-              </section>
-            </div>
-
-            {/* Prevention Checklist */}
-            <section className="bg-gray-50 rounded-xl p-6 border border-gray-100">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                  Prevention Protocol
-                </h3>
-                {isEditing && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-gray-600 hover:text-indigo-600"
-                    onClick={() => setEditedEntry({
-                      ...editedEntry,
-                      preventionChecklist: [...editedEntry.preventionChecklist, '']
-                    })}
-                  >
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Item
-                  </Button>
-                )}
+                <h3 className="font-bold text-rose-900">Avoid These Pitfalls</h3>
               </div>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {isEditing ? (
-                  editedEntry.preventionChecklist.map((item, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200">
-                      <div className="w-5 h-5 rounded border-2 border-gray-300 flex items-center justify-center">
-                        {/* Checkbox placeholder */}
-                      </div>
-                      <input
-                        className="flex-1 p-1 border-none bg-transparent focus:outline-none"
-                        value={item}
-                        onChange={e => {
-                          const newList = [...editedEntry.preventionChecklist];
-                          newList[i] = e.target.value;
-                          setEditedEntry({...editedEntry, preventionChecklist: newList});
-                        }}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-gray-400 hover:text-red-600 p-1"
-                        onClick={() => {
-                          const newList = editedEntry.preventionChecklist.filter((_, index) => index !== i);
-                          setEditedEntry({...editedEntry, preventionChecklist: newList});
-                        }}
-                      >
-                        <XIcon className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  ))
-                ) : (
-                  entry.preventionChecklist.map((item, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-100 shadow-sm hover:border-indigo-200 transition-all cursor-default">
-                      <div className="w-5 h-5 rounded border-2 border-gray-300 text-white flex items-center justify-center">
-                        {/* Placeholder for checked state */}
-                      </div>
-                      <span className="text-gray-700 font-medium text-sm">{item}</span>
-                    </div>
-                  ))
-                )}
-              </div>
+              <ul className="space-y-3">
+                {entry.dontList.map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 group/item">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-400 mt-2 shrink-0 group-hover/item:scale-125 transition-transform" />
+                    <span className="text-gray-700 group-hover/item:text-gray-900 transition-colors">{item}</span>
+                  </li>
+                ))}
+              </ul>
             </section>
           </div>
 
-          {/* Footer Actions */}
-          <div className="bg-gray-50/50 backdrop-blur px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100">
-            <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-              {isEditing ? (
-                <div className="flex flex-wrap gap-2">
-                  {editedEntry.tags.map((tag, index) => (
-                    <div key={index} className="flex items-center gap-1 bg-white border border-gray-300 rounded-full px-3 py-1">
-                      <input
-                        className="text-xs bg-transparent border-none focus:outline-none min-w-[60px]"
-                        value={tag}
-                        onChange={e => {
-                          const newTags = [...editedEntry.tags];
-                          newTags[index] = e.target.value;
-                          setEditedEntry({...editedEntry, tags: newTags});
-                        }}
-                      />
-                      <button
-                        onClick={() => {
-                          const newTags = editedEntry.tags.filter((_, i) => i !== index);
-                          setEditedEntry({...editedEntry, tags: newTags});
-                        }}
-                        className="text-gray-400 hover:text-red-600"
-                      >
-                        <XIcon className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="rounded-full text-gray-500 border-dashed"
-                    onClick={() => setEditedEntry({
-                      ...editedEntry,
-                      tags: [...editedEntry.tags, '']
-                    })}
-                  >
-                    + Add Tag
-                  </Button>
+          {/* Prevention Checklist */}
+          <section className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+              Prevention Protocol
+            </h3>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {entry.preventionChecklist.map((item, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-100 shadow-sm hover:border-indigo-200 transition-all cursor-default">
+                  <div className="w-5 h-5 rounded border-2 border-gray-300 text-white flex items-center justify-center">
+                    {/* Placeholder for checked state logic if interactive later */}
+                  </div>
+                  <span className="text-gray-700 font-medium text-sm">{item}</span>
                 </div>
-              ) : (
-                entry.tags.map(tag => (
-                  <span key={tag} className="text-xs font-medium text-gray-500 bg-white border border-gray-200 px-2 py-1 rounded shadow-sm">
-                    #{tag}
-                  </span>
-                ))
-              )}
+              ))}
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto justify-end">
-              {!readOnly && onPublishToggle && (
-                <Button
-                  variant={entry.isPublished ? "outline" : "default"}
-                  size="sm"
-                  className={entry.isPublished
-                    ? "text-gray-600 border-gray-300 hover:bg-gray-50"
-                    : "bg-teal-600 hover:bg-teal-700 text-white"}
-                  onClick={handlePublishToggle}
-                >
-                  {entry.isPublished ? (
-                    <>
-                      <Lock className="w-4 h-4 mr-2" />
-                      <span className="hidden sm:inline">Unpublish</span>
-                    </>
-                  ) : (
-                    <>
-                      <Globe className="w-4 h-4 mr-2" />
-                      <span className="hidden sm:inline">Publish to Library</span>
-                    </>
-                  )}
-                </Button>
-              )}
-              <div className="flex items-center gap-2">
-                {showCancelExport && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-rose-600 border-rose-200 hover:bg-rose-50"
-                    onClick={handleCancelExport}
-                  >
-                    <X className="w-4 h-4 mr-2" />
-                    Cancel Export
-                  </Button>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn(
-                    "text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all",
-                    copySuccess && "text-emerald-600 bg-emerald-50"
-                  )}
-                  onClick={handleCopy}
-                >
-                  {copySuccess ? (
-                    <>
-                      <CheckCircle2 className="w-4 h-4 mr-2" />
-                      <span className="hidden sm:inline">Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-4 h-4 mr-2" />
-                      <span className="hidden sm:inline">Copy</span>
-                    </>
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-500 hover:text-amber-600 hover:bg-amber-50"
-                  onClick={handleShare}
-                >
-                  <Share2 className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Share</span>
-                </Button>
-                <div className="flex flex-col items-start">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="text-indigo-600 border-indigo-200 hover:bg-indigo-50"
-                    onClick={handleExport}
-                    disabled={isExporting}
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    {isExporting ? 'Exporting…' : 'Export'}
-                  </Button>
-                  <span className="text-xs text-gray-400 mt-1">
-                    After clicking Export, choose "Save as PDF" in the print dialog.
-                  </span>
-                </div>
-              </div>
-            </div>
+          </section>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="bg-gray-50/50 backdrop-blur px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            {entry.tags.map(tag => (
+              <span key={tag} className="text-xs font-medium text-gray-500 bg-white border border-gray-200 px-2 py-1 rounded shadow-sm">
+                #{tag}
+              </span>
+            ))}
           </div>
+          <div className="flex gap-2 w-full sm:w-auto justify-end">
+            {!readOnly && onPublishToggle && (
+              <Button
+                variant={entry.isPublished ? "outline" : "default"}
+                size="sm"
+                className={entry.isPublished
+                  ? "text-gray-600 border-gray-300 hover:bg-gray-50"
+                  : "bg-teal-600 hover:bg-teal-700 text-white"}
+                onClick={handlePublishToggle}
+              >
+                {entry.isPublished ? (
+                  <>
+                    <Lock className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Unpublish</span>
+                  </>
+                ) : (
+                  <>
+                    <Globe className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Publish to Library</span>
+                  </>
+                )}
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all",
+                copySuccess && "text-emerald-600 bg-emerald-50"
+              )}
+              onClick={handleCopy}
+            >
+              {copySuccess ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Copy</span>
+                </>
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-500 hover:text-amber-600 hover:bg-amber-50"
+              onClick={handleShare}
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Share</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+              onClick={handleExport}
+              disabled={isExporting}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              {isExporting ? 'Exporting...' : 'Export'}
+            </Button>
+          </div>
+        </div>
         </Card>
       </div>
     </div>
