@@ -6,8 +6,18 @@ import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Card } from './ui/card';
-import { Loader2, Wand2, Save, FileText, AlertTriangle, ArrowRight, ChevronRight, Check } from 'lucide-react';
+import { Loader2, Wand2, Save, FileText, AlertTriangle, ArrowRight, ChevronRight, Check, Sparkles } from 'lucide-react';
 import { PlaybookCard } from './PlaybookCard';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from './ui/alert-dialog';
 
 interface Props {
   industry: Industry;
@@ -18,7 +28,12 @@ interface Props {
 export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  
+  const [errorDialog, setErrorDialog] = useState<{ open: boolean; title: string; message: string }>({
+    open: false,
+    title: '',
+    message: '',
+  });
+
   const [formData, setFormData] = useState({
     title: '',
     category: 'Process Improvement',
@@ -29,22 +44,38 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
 
   const [generatedEntry, setGeneratedEntry] = useState<PlaybookEntry | null>(null);
 
+  const showError = (title: string, message: string) => {
+    setErrorDialog({ open: true, title, message });
+  };
+
   const generateCard = async () => {
-    if (!formData.title || !formData.summary) return;
+    if (!formData.title || !formData.summary) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
 
     if (formData.title.trim().length < 3) {
-      alert('Please provide a more descriptive project title (at least 3 characters).');
+      showError(
+        'Title Too Short',
+        'Please provide a more descriptive project title (at least 3 characters).'
+      );
       return;
     }
 
     if (formData.summary.trim().length < 20) {
-      alert('Please provide a more detailed summary of what happened (at least 20 characters).');
+      showError(
+        'Summary Too Short',
+        'Please provide a more detailed summary of what happened (at least 20 characters).'
+      );
       return;
     }
 
     const hasOnlyRandomChars = /^[a-z]{1,5}$/i.test(formData.summary.trim());
     if (hasOnlyRandomChars) {
-      alert('Please provide a meaningful description of the incident, not just random characters.');
+      showError(
+        'Invalid Input',
+        'Please provide a meaningful description of the incident, not just random characters.'
+      );
       return;
     }
 
@@ -96,9 +127,13 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
 
       setGeneratedEntry(newEntry);
       setShowPreview(true);
+      toast.success('Playbook generated successfully!');
     } catch (error) {
       console.error('Error generating playbook:', error);
-      alert(error instanceof Error ? error.message : 'Failed to generate playbook. Please try again.');
+      showError(
+        'Generation Failed',
+        error instanceof Error ? error.message : 'Failed to generate playbook. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -242,17 +277,19 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
               </div>
 
               {/* Action Bar */}
-              <div className="flex items-center justify-between pt-6 border-t border-gray-100">
-                <Button variant="ghost" onClick={onCancel} className="text-gray-500 hover:text-gray-900">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-6 border-t border-gray-100">
+                <Button variant="ghost" onClick={onCancel} className="text-gray-500 hover:text-gray-900 sm:w-auto">
                   Cancel
                 </Button>
                 <Button
                   onClick={generateCard}
                   disabled={loading || !formData.title || !formData.summary}
-                  className="bg-blue-600 hover:bg-blue-700 text-white min-w-[200px] shadow-lg shadow-blue-500/20 rounded-full h-12 text-base transition-all hover:scale-105"
+                  className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-700 hover:via-indigo-700 hover:to-blue-700 text-white min-w-[240px] shadow-xl shadow-blue-500/30 rounded-full h-14 text-lg font-semibold transition-all hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:hover:scale-100 group overflow-hidden"
                 >
-                  <Wand2 className="w-5 h-5 mr-2" />
-                  Generate Playbook
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></span>
+                  <Sparkles className="w-5 h-5 mr-2 animate-pulse" />
+                  Generate Playbook with AI
+                  <Wand2 className="w-5 h-5 ml-2" />
                 </Button>
               </div>
             </div>
@@ -288,6 +325,28 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
           )}
         </div>
       )}
+
+      <AlertDialog open={errorDialog.open} onOpenChange={(open) => setErrorDialog({ ...errorDialog, open })}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+              <AlertTriangle className="h-6 w-6 text-red-600" />
+            </div>
+            <AlertDialogTitle className="text-center text-xl font-bold">{errorDialog.title}</AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-base text-gray-600">
+              {errorDialog.message}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center">
+            <AlertDialogAction
+              onClick={() => setErrorDialog({ ...errorDialog, open: false })}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8"
+            >
+              Got it
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
