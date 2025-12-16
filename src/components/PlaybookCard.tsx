@@ -6,6 +6,8 @@ import { Card } from './ui/card';
 import { CheckCircle2, XCircle, AlertTriangle, FileText, Share2, Copy, Edit2, Download, Save, X, Lightbulb, ShieldAlert, ArrowRight, Globe, Lock } from 'lucide-react';
 import { cn } from './ui/utils';
 import { toast } from 'sonner';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface Props {
   entry: PlaybookEntry;
@@ -20,6 +22,8 @@ export const PlaybookCard: React.FC<Props> = ({ entry, onEdit, onStatusChange, o
   const [isEditing, setIsEditing] = React.useState(false);
   const [editedEntry, setEditedEntry] = React.useState(entry);
   const [copySuccess, setCopySuccess] = React.useState(false);
+  const [isExporting, setIsExporting] = React.useState(false);
+  const cardRef = React.useRef<HTMLDivElement>(null);
 
   // Update internal state when prop changes, unless currently editing
   React.useEffect(() => {
@@ -101,29 +105,53 @@ Tags: ${entry.tags.join(', ')}`;
         toast.info('Content copied to clipboard (Share not supported on this device)');
       }
     } catch (err) {
-      if ((err as Error).name !== 'AbortError') {
+      if ((err as Error).name === 'AbortError') {
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(formatPlaybookText());
+        toast.info('Content copied to clipboard');
+      } catch (clipboardErr) {
         console.error('Error sharing:', err);
         toast.error('Failed to share playbook');
       }
     }
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
+    if (!cardRef.current) {
+      toast.error('Failed to export playbook');
+      return;
+    }
+
+    setIsExporting(true);
+    toast.info('Generating PDF...');
+
     try {
-      const content = formatPlaybookText();
-      const blob = new Blob([content], { type: 'text/markdown' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `playbook-${entry.title.toLowerCase().replace(/\s+/g, '-')}.md`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      toast.success('Playbook exported successfully!');
+      const canvas = await html2canvas(cardRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height],
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`playbook-${entry.title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+
+      toast.success('Playbook exported as PDF!');
     } catch (err) {
       console.error('Failed to export:', err);
       toast.error('Failed to export playbook');
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -137,8 +165,8 @@ Tags: ${entry.tags.join(', ')}`;
     <div className="group relative">
       {/* Decorative background blur */}
       <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl opacity-0 group-hover:opacity-20 transition duration-500 blur-lg" />
-      
-      <Card className="relative overflow-hidden border border-gray-200 shadow-xl shadow-gray-200/50 rounded-xl bg-white animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+      <Card ref={cardRef} className="relative overflow-hidden border border-gray-200 shadow-xl shadow-gray-200/50 rounded-xl bg-white animate-in fade-in slide-in-from-bottom-4 duration-500">
         
         {/* Top Status Bar */}
         <div className="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
@@ -396,9 +424,10 @@ Tags: ${entry.tags.join(', ')}`;
               size="sm"
               className="text-indigo-600 border-indigo-200 hover:bg-indigo-50"
               onClick={handleExport}
+              disabled={isExporting}
             >
               <Download className="w-4 h-4 mr-2" />
-              Export
+              {isExporting ? 'Exporting...' : 'Export'}
             </Button>
           </div>
         </div>
