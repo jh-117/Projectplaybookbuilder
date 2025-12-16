@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { PlaybookEntry, Industry, INDUSTRIES } from '../types';
+import * as db from '../lib/database';
 
 export function useStore() {
   const [selectedIndustry, setSelectedIndustry] = useState<Industry | null>(() => {
@@ -7,10 +8,8 @@ export function useStore() {
     return saved ? (saved as Industry) : null;
   });
 
-  const [entries, setEntries] = useState<PlaybookEntry[]>(() => {
-    const saved = localStorage.getItem('pp_entries');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [entries, setEntries] = useState<PlaybookEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (selectedIndustry) {
@@ -21,28 +20,57 @@ export function useStore() {
   }, [selectedIndustry]);
 
   useEffect(() => {
-    localStorage.setItem('pp_entries', JSON.stringify(entries));
-  }, [entries]);
+    loadEntries();
+  }, []);
 
-  const addEntry = (entry: PlaybookEntry) => {
-    setEntries((prev) => [entry, ...prev]);
+  const loadEntries = async () => {
+    setIsLoading(true);
+    const loadedEntries = await db.getAllEntries();
+    setEntries(loadedEntries);
+    setIsLoading(false);
   };
 
-  const updateEntry = (id: string, updates: Partial<PlaybookEntry>) => {
-    setEntries((prev) => prev.map(e => e.id === id ? { ...e, ...updates, lastUpdated: Date.now() } : e));
+  const addEntry = async (entry: PlaybookEntry) => {
+    const created = await db.createEntry(entry);
+    if (created) {
+      setEntries((prev) => [created, ...prev]);
+    }
+    return created;
   };
 
-  const deleteEntry = (id: string) => {
-    setEntries((prev) => prev.filter(e => e.id !== id));
+  const updateEntry = async (id: string, updates: Partial<PlaybookEntry>) => {
+    const updated = await db.updateEntry(id, { ...updates, lastUpdated: Date.now() });
+    if (updated) {
+      setEntries((prev) => prev.map(e => e.id === id ? updated : e));
+    }
+    return updated;
+  };
+
+  const deleteEntry = async (id: string) => {
+    const success = await db.deleteEntry(id);
+    if (success) {
+      setEntries((prev) => prev.filter(e => e.id !== id));
+    }
+    return success;
+  };
+
+  const togglePublish = async (id: string, isPublished: boolean) => {
+    const updated = await db.togglePublishEntry(id, isPublished);
+    if (updated) {
+      setEntries((prev) => prev.map(e => e.id === id ? updated : e));
+    }
+    return updated;
   };
 
   return {
     selectedIndustry,
     setSelectedIndustry,
     entries,
+    isLoading,
     addEntry,
     updateEntry,
     deleteEntry,
+    togglePublish,
     INDUSTRIES
   };
 }

@@ -16,13 +16,15 @@ import { Toaster } from 'sonner';
 type View = 'dashboard' | 'new' | 'library' | 'my-entries' | 'view-entry';
 
 export default function App() {
-  const { 
-    selectedIndustry, 
-    setSelectedIndustry, 
-    entries, 
-    addEntry, 
-    updateEntry, 
-    deleteEntry 
+  const {
+    selectedIndustry,
+    setSelectedIndustry,
+    entries,
+    isLoading,
+    addEntry,
+    updateEntry,
+    deleteEntry,
+    togglePublish
   } = useStore();
 
   const [currentView, setCurrentView] = useState<View>('dashboard');
@@ -50,12 +52,18 @@ export default function App() {
     setCurrentView('view-entry');
   };
 
-  const handleSaveEntry = (entry: PlaybookEntry) => {
-    addEntry(entry);
-    handleViewEntry(entry); // Go to view mode of the new entry
+  const handleSaveEntry = async (entry: PlaybookEntry) => {
+    await addEntry(entry);
+    handleViewEntry(entry);
   };
 
-  // Combine user entries with mock library for the "Library" view
+  const handlePublishToggle = async (id: string, isPublished: boolean) => {
+    await togglePublish(id, isPublished);
+    if (selectedEntry && selectedEntry.id === id) {
+      setSelectedEntry({ ...selectedEntry, isPublished });
+    }
+  };
+
   const libraryEntries = [...entries, ...MOCK_LIBRARY];
 
   return (
@@ -113,23 +121,27 @@ export default function App() {
             <span className="font-medium">Back to Dashboard</span>
           </Button>
           
-          <PlaybookCard 
-            entry={selectedEntry} 
-            // Allow editing status if it's one of my entries
+          <PlaybookCard
+            entry={selectedEntry}
             onStatusChange={
-              entries.some(e => e.id === selectedEntry.id) 
-                ? (status) => updateEntry(selectedEntry.id, { status })
+              entries.some(e => e.id === selectedEntry.id)
+                ? async (status) => await updateEntry(selectedEntry.id, { status })
                 : undefined
             }
             onSave={
-              entries.some(e => e.id === selectedEntry.id) 
-                ? (updatedEntry) => {
-                    updateEntry(updatedEntry.id, updatedEntry);
+              entries.some(e => e.id === selectedEntry.id)
+                ? async (updatedEntry) => {
+                    await updateEntry(updatedEntry.id, updatedEntry);
                     setSelectedEntry(updatedEntry);
                   }
                 : undefined
             }
-            readOnly={!entries.some(e => e.id === selectedEntry.id)} // Read only if it's a mock library entry
+            onPublishToggle={
+              entries.some(e => e.id === selectedEntry.id)
+                ? (isPublished) => handlePublishToggle(selectedEntry.id, isPublished)
+                : undefined
+            }
+            readOnly={!entries.some(e => e.id === selectedEntry.id)}
           />
         </div>
       )}

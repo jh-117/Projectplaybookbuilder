@@ -18,8 +18,9 @@ export const Library: React.FC<Props> = ({ entries, currentIndustry, onViewEntry
   const [customIndustry, setCustomIndustry] = useState('');
   const [customCategory, setCustomCategory] = useState('');
 
-  // Filter Logic
-  const filteredEntries = entries.filter(entry => {
+  const publishedEntries = entries.filter(entry => entry.isPublished);
+
+  const filteredEntries = publishedEntries.filter(entry => {
     const matchesSearch = entry.title.toLowerCase().includes(search.toLowerCase()) ||
                           entry.summary.toLowerCase().includes(search.toLowerCase());
 
@@ -32,7 +33,7 @@ export const Library: React.FC<Props> = ({ entries, currentIndustry, onViewEntry
     return matchesSearch && matchesIndustry && matchesCategory;
   });
 
-  const uniqueCategories = Array.from(new Set(entries.map(e => e.category)));
+  const uniqueCategories = Array.from(new Set(publishedEntries.map(e => e.category)));
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">

@@ -42,6 +42,7 @@ export interface PlaybookEntry {
   preventionChecklist: string[];
 
   tags: string[];
+  isPublished: boolean;
 }
 
 export const INDUSTRIES: string[] = [

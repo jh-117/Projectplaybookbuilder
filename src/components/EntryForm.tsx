@@ -126,6 +126,7 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
         doList: generatedContent.doList,
         dontList: generatedContent.dontList,
         preventionChecklist: generatedContent.preventionChecklist,
+        isPublished: false,
       };
 
       setGeneratedEntry(newEntry);

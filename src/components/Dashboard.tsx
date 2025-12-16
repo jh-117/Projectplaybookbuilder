@@ -27,7 +27,9 @@ const MOCK_SUGGESTIONS: Partial<PlaybookEntry>[] = [
     recommendation: 'Implement automated canary deployments',
     doList: ['Test rollback scripts', 'Monitor error rates'],
     dontList: ['Deploy on Fridays', 'Ignore alerts'],
-    preventionChecklist: ['Check logs', 'Notify stakeholders']
+    preventionChecklist: ['Check logs', 'Notify stakeholders'],
+    isPublished: true,
+    dateCreated: Date.now() - 100000000
   },
   {
     id: 'sugg-2',
@@ -42,7 +44,9 @@ const MOCK_SUGGESTIONS: Partial<PlaybookEntry>[] = [
     recommendation: 'Centralize audit trail evidence',
     doList: ['Maintain daily logs', 'Review access monthly'],
     dontList: ['Wait until audit week', 'Share passwords'],
-    preventionChecklist: ['Update policy docs', 'Conduct mock audit']
+    preventionChecklist: ['Update policy docs', 'Conduct mock audit'],
+    isPublished: true,
+    dateCreated: Date.now() - 200000000
   }
 ];
 

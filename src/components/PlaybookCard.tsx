@@ -3,7 +3,7 @@ import { PlaybookEntry } from '../types';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
-import { CheckCircle2, XCircle, AlertTriangle, FileText, Share2, Copy, Edit2, Download, Save, X, Lightbulb, ShieldAlert, ArrowRight } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertTriangle, FileText, Share2, Copy, Edit2, Download, Save, X, Lightbulb, ShieldAlert, ArrowRight, Globe, Lock } from 'lucide-react';
 import { cn } from './ui/utils';
 import { toast } from 'sonner';
 
@@ -12,10 +12,11 @@ interface Props {
   onEdit?: () => void;
   onStatusChange?: (status: PlaybookEntry['status']) => void;
   onSave?: (entry: PlaybookEntry) => void;
+  onPublishToggle?: (isPublished: boolean) => void;
   readOnly?: boolean;
 }
 
-export const PlaybookCard: React.FC<Props> = ({ entry, onEdit, onStatusChange, onSave, readOnly = false }) => {
+export const PlaybookCard: React.FC<Props> = ({ entry, onEdit, onStatusChange, onSave, onPublishToggle, readOnly = false }) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [editedEntry, setEditedEntry] = React.useState(entry);
   const [copySuccess, setCopySuccess] = React.useState(false);
@@ -124,6 +125,12 @@ Tags: ${entry.tags.join(', ')}`;
       console.error('Failed to export:', err);
       toast.error('Failed to export playbook');
     }
+  };
+
+  const handlePublishToggle = () => {
+    const newPublishStatus = !entry.isPublished;
+    onPublishToggle?.(newPublishStatus);
+    toast.success(newPublishStatus ? 'Playbook published to library!' : 'Playbook unpublished from library');
   };
 
   return (
@@ -332,6 +339,28 @@ Tags: ${entry.tags.join(', ')}`;
             ))}
           </div>
           <div className="flex gap-2 w-full sm:w-auto justify-end">
+            {!readOnly && onPublishToggle && (
+              <Button
+                variant={entry.isPublished ? "outline" : "default"}
+                size="sm"
+                className={entry.isPublished
+                  ? "text-gray-600 border-gray-300 hover:bg-gray-50"
+                  : "bg-teal-600 hover:bg-teal-700 text-white"}
+                onClick={handlePublishToggle}
+              >
+                {entry.isPublished ? (
+                  <>
+                    <Lock className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Unpublish</span>
+                  </>
+                ) : (
+                  <>
+                    <Globe className="w-4 h-4 mr-2" />
+                    <span className="hidden sm:inline">Publish to Library</span>
+                  </>
+                )}
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
