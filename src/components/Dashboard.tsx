@@ -47,9 +47,23 @@ const MOCK_SUGGESTIONS: Partial<PlaybookEntry>[] = [
 ];
 
 export const Dashboard: React.FC<Props> = ({ industry, entries, onViewEntry, onNewEntry }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
   const suggestions = MOCK_SUGGESTIONS.filter(s => s.industry === industry || !s.industry);
   const displaySuggestions = suggestions.length > 0 ? suggestions : MOCK_SUGGESTIONS;
   const recentEntries = entries.slice(0, 5);
+
+  const allSearchableEntries = [...entries, ...displaySuggestions.map(s => s as PlaybookEntry)];
+
+  const searchResults = searchTerm.trim()
+    ? allSearchableEntries.filter(entry =>
+        entry.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entry.summary?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        entry.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      )
+    : [];
+
+  const showSearchResults = searchTerm.trim().length > 0;
 
   return (
     <div className="space-y-12 animate-in fade-in duration-500 pb-12">
@@ -74,13 +88,55 @@ export const Dashboard: React.FC<Props> = ({ industry, entries, onViewEntry, onN
           </div>
           
           <div className="w-full max-w-xl relative group/search">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
               <Search className="h-5 w-5 text-indigo-300 group-focus-within/search:text-indigo-500 transition-colors" />
             </div>
-            <Input 
-              placeholder="Search playbooks, lessons, or tags..." 
+            <Input
+              placeholder="Search playbooks, lessons, or tags..."
               className="w-full pl-12 py-6 bg-white/10 border-indigo-400/30 text-white placeholder:text-indigo-200/50 rounded-2xl focus:bg-white focus:text-gray-900 focus:placeholder:text-gray-400 focus:ring-0 shadow-lg backdrop-blur-sm transition-all text-lg"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
+            {showSearchResults && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 max-h-96 overflow-y-auto z-20">
+                {searchResults.length > 0 ? (
+                  <div className="divide-y divide-gray-100">
+                    {searchResults.slice(0, 10).map((entry) => (
+                      <div
+                        key={entry.id}
+                        onClick={() => {
+                          onViewEntry(entry);
+                          setSearchTerm('');
+                        }}
+                        className="p-4 hover:bg-gray-50 cursor-pointer transition-colors group"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="flex-1">
+                            <h4 className="text-sm font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
+                              {entry.title}
+                            </h4>
+                            <p className="text-xs text-gray-500 mt-1 line-clamp-2">{entry.summary}</p>
+                            <div className="flex gap-2 mt-2">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 uppercase">
+                                {entry.industry}
+                              </span>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 uppercase">
+                                {entry.category}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 text-center">
+                    <Filter className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">No results found for "{searchTerm}"</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="pt-4">

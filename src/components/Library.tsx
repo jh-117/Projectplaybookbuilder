@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlaybookEntry, Industry, INDUSTRIES } from '../types';
+import { PlaybookEntry, Industry, INDUSTRIES, CATEGORIES } from '../types';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Button } from './ui/button';
@@ -15,14 +15,20 @@ export const Library: React.FC<Props> = ({ entries, currentIndustry, onViewEntry
   const [search, setSearch] = useState('');
   const [filterIndustry, setFilterIndustry] = useState<string>('All');
   const [filterCategory, setFilterCategory] = useState<string>('All');
+  const [customIndustry, setCustomIndustry] = useState('');
+  const [customCategory, setCustomCategory] = useState('');
 
   // Filter Logic
   const filteredEntries = entries.filter(entry => {
-    const matchesSearch = entry.title.toLowerCase().includes(search.toLowerCase()) || 
+    const matchesSearch = entry.title.toLowerCase().includes(search.toLowerCase()) ||
                           entry.summary.toLowerCase().includes(search.toLowerCase());
-    const matchesIndustry = filterIndustry === 'All' || entry.industry === filterIndustry;
-    const matchesCategory = filterCategory === 'All' || entry.category === filterCategory;
-    
+
+    const activeIndustry = filterIndustry === 'Other' ? customIndustry : filterIndustry;
+    const matchesIndustry = filterIndustry === 'All' || entry.industry.toLowerCase() === activeIndustry.toLowerCase();
+
+    const activeCategory = filterCategory === 'Other' ? customCategory : filterCategory;
+    const matchesCategory = filterCategory === 'All' || entry.category.toLowerCase() === activeCategory.toLowerCase();
+
     return matchesSearch && matchesIndustry && matchesCategory;
   });
 
@@ -52,9 +58,9 @@ export const Library: React.FC<Props> = ({ entries, currentIndustry, onViewEntry
           </div>
         </div>
 
-        <div className="w-full md:w-48 space-y-2">
+        <div className="w-full md:w-56 space-y-2">
           <label className="text-sm font-medium text-gray-700 ml-1">Industry</label>
-          <Select value={filterIndustry} onValueChange={setFilterIndustry}>
+          <Select value={filterIndustry} onValueChange={(v) => { setFilterIndustry(v); setCustomIndustry(''); }}>
             <SelectTrigger className="h-10 border-gray-200 bg-gray-50/50 focus:bg-white">
               <SelectValue placeholder="All Industries" />
             </SelectTrigger>
@@ -63,31 +69,51 @@ export const Library: React.FC<Props> = ({ entries, currentIndustry, onViewEntry
               {INDUSTRIES.map(i => (
                 <SelectItem key={i} value={i}>{i}</SelectItem>
               ))}
+              <SelectItem value="Other">Other (specify)</SelectItem>
             </SelectContent>
           </Select>
+          {filterIndustry === 'Other' && (
+            <Input
+              placeholder="Enter industry..."
+              className="h-9 border-gray-200 bg-gray-50/50 focus:bg-white text-sm"
+              value={customIndustry}
+              onChange={(e) => setCustomIndustry(e.target.value)}
+            />
+          )}
         </div>
 
-        <div className="w-full md:w-48 space-y-2">
+        <div className="w-full md:w-56 space-y-2">
           <label className="text-sm font-medium text-gray-700 ml-1">Category</label>
-          <Select value={filterCategory} onValueChange={setFilterCategory}>
+          <Select value={filterCategory} onValueChange={(v) => { setFilterCategory(v); setCustomCategory(''); }}>
             <SelectTrigger className="h-10 border-gray-200 bg-gray-50/50 focus:bg-white">
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="All">All Categories</SelectItem>
-              {uniqueCategories.map(c => (
+              {CATEGORIES.map(c => (
                 <SelectItem key={c} value={c}>{c}</SelectItem>
               ))}
+              <SelectItem value="Other">Other (specify)</SelectItem>
             </SelectContent>
           </Select>
+          {filterCategory === 'Other' && (
+            <Input
+              placeholder="Enter category..."
+              className="h-9 border-gray-200 bg-gray-50/50 focus:bg-white text-sm"
+              value={customCategory}
+              onChange={(e) => setCustomCategory(e.target.value)}
+            />
+          )}
         </div>
         
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           onClick={() => {
             setSearch('');
             setFilterIndustry('All');
             setFilterCategory('All');
+            setCustomIndustry('');
+            setCustomCategory('');
           }}
           className="h-10 px-4 text-gray-500 hover:text-red-500 hover:bg-red-50"
         >
