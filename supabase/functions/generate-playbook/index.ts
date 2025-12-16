@@ -45,6 +45,83 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    if (title.trim().length < 3 || summary.trim().length < 20) {
+      return new Response(
+        JSON.stringify({ error: 'Title and summary must be sufficiently detailed' }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
+
+    const validationPrompt = `Analyze if the following incident description is meaningful and provides enough information to create a lessons learned playbook entry:
+
+Title: ${title}
+Summary: ${summary}
+
+Respond with a JSON object containing:
+{
+  "isValid": boolean (true if meaningful, false if random/insufficient),
+  "reason": string (explanation if not valid)
+}
+
+Consider it invalid if:
+- The text appears to be random characters or gibberish
+- The summary lacks substance or context
+- There's no clear incident or issue described
+- It's too vague to derive actionable insights`;
+
+    const validationResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a validator that determines if incident descriptions are meaningful and actionable. Always respond with valid JSON.'
+          },
+          {
+            role: 'user',
+            content: validationPrompt
+          }
+        ],
+        temperature: 0.3,
+        response_format: { type: 'json_object' }
+      }),
+    });
+
+    if (!validationResponse.ok) {
+      const errorText = await validationResponse.text();
+      console.error('OpenAI validation error:', errorText);
+      throw new Error(`OpenAI API error: ${validationResponse.status}`);
+    }
+
+    const validationData = await validationResponse.json();
+    const validation = JSON.parse(validationData.choices[0].message.content);
+
+    if (!validation.isValid) {
+      return new Response(
+        JSON.stringify({ 
+          error: validation.reason || 'The provided information is not sufficient to generate a meaningful playbook entry. Please provide a clear description of the incident, what happened, and relevant details.'
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
+
     const prompt = `You are an expert project management consultant creating a playbook entry for a "Lessons Learned" system in the ${industry} industry.
 
 Incident Details:

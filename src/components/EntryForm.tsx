@@ -32,6 +32,22 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
   const generateCard = async () => {
     if (!formData.title || !formData.summary) return;
 
+    if (formData.title.trim().length < 3) {
+      alert('Please provide a more descriptive project title (at least 3 characters).');
+      return;
+    }
+
+    if (formData.summary.trim().length < 20) {
+      alert('Please provide a more detailed summary of what happened (at least 20 characters).');
+      return;
+    }
+
+    const hasOnlyRandomChars = /^[a-z]{1,5}$/i.test(formData.summary.trim());
+    if (hasOnlyRandomChars) {
+      alert('Please provide a meaningful description of the incident, not just random characters.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -156,8 +172,8 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
                  
                  <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label className="text-gray-700">Project / Initiative Name</Label>
-                      <Input 
+                      <Label className="text-gray-700">Project / Initiative Name <span className="text-red-500">*</span></Label>
+                      <Input
                         className="bg-gray-50/50 border-gray-200 focus:bg-white transition-all"
                         placeholder="e.g. Q4 Cloud Migration"
                         value={formData.title}
@@ -185,13 +201,14 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
                  </div>
 
                  <div className="space-y-2">
-                    <Label className="text-gray-700">What Happened? (Summary)</Label>
-                    <Textarea 
-                      className="min-h-[120px] bg-gray-50/50 border-gray-200 focus:bg-white transition-all resize-y" 
-                      placeholder="Describe the event, what went wrong, or the insight gained..."
+                    <Label className="text-gray-700">What Happened? (Summary) <span className="text-red-500">*</span></Label>
+                    <Textarea
+                      className="min-h-[120px] bg-gray-50/50 border-gray-200 focus:bg-white transition-all resize-y"
+                      placeholder="Describe the incident in detail. For example: 'During our Q4 cloud migration, we experienced 2 hours of downtime due to misconfigured load balancers...' (minimum 20 characters)"
                       value={formData.summary}
                       onChange={e => setFormData({...formData, summary: e.target.value})}
                     />
+                    <p className="text-xs text-gray-500">{formData.summary.length} / 20 characters minimum</p>
                  </div>
               </div>
 
