@@ -6,7 +6,7 @@ import { Card } from './ui/card';
 import { CheckCircle2, XCircle, AlertTriangle, FileText, Share2, Copy, Edit2, Download, Save, X, Lightbulb, ShieldAlert, ArrowRight, Globe, Lock } from 'lucide-react';
 import { cn } from './ui/utils';
 import { toast } from 'sonner';
-import html2canvas from 'html2canvas';
+import { toPng as htmlToImage } from 'html-to-image';
 import jsPDF from 'jspdf';
 
 interface Props {
