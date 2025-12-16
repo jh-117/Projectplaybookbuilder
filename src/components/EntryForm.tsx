@@ -29,13 +29,37 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
 
   const [generatedEntry, setGeneratedEntry] = useState<PlaybookEntry | null>(null);
 
-  const generateCard = () => {
+  const generateCard = async () => {
     if (!formData.title || !formData.summary) return;
-    
+
     setLoading(true);
-    
-    // Simulate AI Generation with "Thinking" steps
-    setTimeout(() => {
+
+    try {
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-playbook`;
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          category: formData.category,
+          summary: formData.summary,
+          rootCause: formData.rootCause,
+          impact: formData.impact,
+          industry: industry,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate playbook');
+      }
+
+      const generatedContent = await response.json();
+
       const newEntry: PlaybookEntry = {
         id: crypto.randomUUID(),
         dateCreated: Date.now(),
@@ -45,36 +69,23 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
         title: formData.title,
         category: formData.category,
         summary: formData.summary,
-        rootCause: formData.rootCause || "Analysis based on summary suggests a breakdown in initial requirements gathering phase.",
-        impact: formData.impact || "Operational efficiency decreased by approximately 15% during the incident window.",
+        rootCause: generatedContent.rootCause,
+        impact: generatedContent.impact,
         tags: [industry, formData.category, "AI Generated"],
-        
-        // Mock AI Generated Content
-        recommendation: `Implement a standardized ${formData.category.toLowerCase()} protocol to prevent recurrence, focusing on early detection mechanisms.`,
-        doList: [
-          "Document all steps immediately after the event",
-          "Consult with cross-functional teams",
-          "Review historical data for patterns",
-          "Update the central knowledge base"
-        ],
-        dontList: [
-          "Ignore minor warning signs",
-          "Proceed without stakeholder approval",
-          "Keep findings siloed within one team",
-          "Rush the root cause analysis"
-        ],
-        preventionChecklist: [
-          "Verify all prerequisites are met",
-          "Schedule follow-up review in 30 days",
-          "Assign ownership of the corrective action",
-          "Update training materials"
-        ]
+        recommendation: generatedContent.recommendation,
+        doList: generatedContent.doList,
+        dontList: generatedContent.dontList,
+        preventionChecklist: generatedContent.preventionChecklist,
       };
-      
+
       setGeneratedEntry(newEntry);
-      setLoading(false);
       setShowPreview(true);
-    }, 2500);
+    } catch (error) {
+      console.error('Error generating playbook:', error);
+      alert(error instanceof Error ? error.message : 'Failed to generate playbook. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const steps = [
@@ -87,9 +98,9 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
      return (
         <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-8 animate-in fade-in duration-500">
            <div className="relative">
-              <div className="w-24 h-24 rounded-full border-4 border-indigo-100 animate-pulse" />
-              <div className="absolute inset-0 border-t-4 border-indigo-600 rounded-full animate-spin" />
-              <Wand2 className="absolute inset-0 m-auto text-indigo-600 w-8 h-8 animate-pulse" />
+              <div className="w-24 h-24 rounded-full border-4 border-blue-100 animate-pulse" />
+              <div className="absolute inset-0 border-t-4 border-blue-600 rounded-full animate-spin" />
+              <Wand2 className="absolute inset-0 m-auto text-blue-600 w-8 h-8 animate-pulse" />
            </div>
            <div className="text-center space-y-2">
               <h2 className="text-2xl font-bold text-gray-900">AI is analyzing your input...</h2>
@@ -101,7 +112,7 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
                  <span>Parsing incident summary</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-600">
-                 <Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
+                 <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
                  <span>Matching with industry best practices</span>
               </div>
               <div className="flex items-center gap-3 text-sm text-gray-400">
@@ -139,7 +150,7 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
               {/* Section 1: Core Info */}
               <div className="space-y-6">
                  <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                    <FileText className="w-5 h-5 text-indigo-600" />
+                    <FileText className="w-5 h-5 text-blue-600" />
                     <h3 className="font-bold text-gray-900">Incident Details</h3>
                  </div>
                  
@@ -218,10 +229,10 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
                 <Button variant="ghost" onClick={onCancel} className="text-gray-500 hover:text-gray-900">
                   Cancel
                 </Button>
-                <Button 
-                  onClick={generateCard} 
+                <Button
+                  onClick={generateCard}
                   disabled={loading || !formData.title || !formData.summary}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[200px] shadow-lg shadow-indigo-500/20 rounded-full h-12 text-base transition-all hover:scale-105"
+                  className="bg-blue-600 hover:bg-blue-700 text-white min-w-[200px] shadow-lg shadow-blue-500/20 rounded-full h-12 text-base transition-all hover:scale-105"
                 >
                   <Wand2 className="w-5 h-5 mr-2" />
                   Generate Playbook
