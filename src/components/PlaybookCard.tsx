@@ -135,76 +135,122 @@ Tags: ${entry.tags.join(', ')}`;
     }
   };
 
-  const handleExport = () => {
-  toast.loading("Preparing PDF…")
+  const handleExport = async () => {
+    if (!cardRef.current) {
+      toast.error('Failed to export playbook');
+      return;
+    }
 
-  // ✅ Only reliable signal after print dialog closes
-  window.onafterprint = () => {
-    toast.success("PDF saved. Check your desktop or chosen folder.")
-    window.onafterprint = null
-  }
+    setIsExporting(true);
+    toast.info('Opening print dialog...');
 
-  const content = cardRef.current
-  if (!content) {
-    toast.error("Nothing to export")
-    return
-  }
+    try {
+      // Clone the preview DOM using outerHTML
+      const clonedHTML = cardRef.current.outerHTML;
 
-  const iframe = document.createElement("iframe")
-  iframe.style.position = "fixed"
-  iframe.style.right = "0"
-  iframe.style.bottom = "0"
-  iframe.style.width = "0"
-  iframe.style.height = "0"
-  iframe.style.border = "0"
+      // Create a hidden iframe
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.top = '-9999px';
+      iframe.style.left = '-9999px';
+      iframe.style.width = '210mm'; // A4 width
+      iframe.style.height = '297mm'; // A4 height
+      document.body.appendChild(iframe);
 
-  document.body.appendChild(iframe)
+      // Wait for iframe to be ready
+      await new Promise<void>((resolve) => {
+        iframe.onload = () => resolve();
+        if (!iframe.contentDocument) {
+          iframe.onload = () => resolve();
+        } else {
+          resolve();
+        }
+      });
 
-  const iframeDoc = iframe.contentWindow?.document
-  if (!iframeDoc) return
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iframeDoc) {
+        throw new Error('Failed to access iframe document');
+      }
 
-  iframeDoc.open()
-  iframeDoc.write(`
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <title>Export PDF</title>
+      // Collect all stylesheets from the main document
+      const styleSheets = Array.from(document.styleSheets);
+      let allStyles = '';
+
+      styleSheets.forEach((sheet) => {
+        try {
+          if (sheet.href) {
+            // External stylesheet - create link tag
+            allStyles += `<link rel="stylesheet" href="${sheet.href}">`;
+          } else if (sheet.cssRules) {
+            // Inline stylesheet - extract rules
+            const rules = Array.from(sheet.cssRules)
+              .map((rule) => rule.cssText)
+              .join('\n');
+            allStyles += `<style>${rules}</style>`;
+          }
+        } catch (e) {
+          // Skip stylesheets we can't access (CORS)
+          console.warn('Could not access stylesheet:', e);
+        }
+      });
+
+      // Add print CSS for exact color printing
+      const printCSS = `
         <style>
           @media print {
+            * {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
             body {
               margin: 0;
-              -webkit-print-color-adjust: exact;
-              print-color-adjust: exact;
+              padding: 20px;
+            }
+            button {
+              display: none !important;
             }
           }
         </style>
-        ${Array.from(document.styleSheets)
-          .map((sheet) => {
-            try {
-              return `<link rel="stylesheet" href="${sheet.href}" />`
-            } catch {
-              return ""
-            }
-          })
-          .join("")}
-      </head>
-      <body>
-        ${content.outerHTML}
-      </body>
-    </html>
-  `)
-  iframeDoc.close()
+      `;
 
-  iframe.onload = () => {
-    iframe.contentWindow?.focus()
-    iframe.contentWindow?.print()
+      // Build the complete HTML document for the iframe
+      iframeDoc.open();
+      iframeDoc.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Playbook - ${entry.title}</title>
+            ${allStyles}
+            ${printCSS}
+          </head>
+          <body>
+            ${clonedHTML}
+          </body>
+        </html>
+      `);
+      iframeDoc.close();
 
-    // cleanup happens after print dialog closes
-    setTimeout(() => {
-      document.body.removeChild(iframe)
-    }, 1000)
-  }
-}
+      // Wait for styles and images to load
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Trigger print dialog
+      iframe.contentWindow?.print();
+
+      // Clean up: remove iframe after print dialog closes
+      // Use a longer delay to ensure print dialog has time to render
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+      }, 1000);
+
+      toast.success('Print dialog opened!');
+    } catch (err) {
+      console.error('Failed to export:', err);
+      toast.error('Failed to open print dialog');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handlePublishToggle = () => {
     const newPublishStatus = !entry.isPublished;
