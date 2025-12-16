@@ -331,7 +331,7 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
                     {/* Button content */}
                     <span className="relative z-10 flex items-center justify-center gap-2">
                       <Sparkles className="w-5 h-5 animate-pulse group-hover:rotate-12 transition-transform duration-300" />
-                      <span className="bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent font-extrabold">
+                      <span className="font-extrabold">
                         Generate Playbook with AI
                       </span>
                       <Wand2 className="w-5 h-5 group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300" />
