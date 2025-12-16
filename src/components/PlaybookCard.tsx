@@ -18,7 +18,8 @@ import {
   Globe,
   Lock,
   X as XIcon,
-  Plus
+  Plus,
+  X
 } from 'lucide-react';
 
 interface Props {
@@ -42,7 +43,18 @@ export const PlaybookCard: React.FC<Props> = ({
   const [editedEntry, setEditedEntry] = React.useState(entry);
   const [copySuccess, setCopySuccess] = React.useState(false);
   const [isExporting, setIsExporting] = React.useState(false);
+  const [showCancelExport, setShowCancelExport] = React.useState(false);
+  const exportTimeoutRef = React.useRef<NodeJS.Timeout>();
   const cardRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    return () => {
+      // Cleanup timeout on unmount
+      if (exportTimeoutRef.current) {
+        clearTimeout(exportTimeoutRef.current);
+      }
+    };
+  }, []);
 
   React.useEffect(() => {
     if (!isEditing) {
@@ -64,6 +76,26 @@ export const PlaybookCard: React.FC<Props> = ({
   const handleCancel = () => {
     setIsEditing(false);
     setEditedEntry(entry);
+  };
+
+  const handleCancelExport = () => {
+    setIsExporting(false);
+    setShowCancelExport(false);
+    
+    // Clear any pending timeouts
+    if (exportTimeoutRef.current) {
+      clearTimeout(exportTimeoutRef.current);
+    }
+    
+    // Remove any existing iframes
+    const iframes = document.querySelectorAll('iframe[style*="-9999px"]');
+    iframes.forEach(iframe => {
+      if (iframe.parentNode) {
+        iframe.parentNode.removeChild(iframe);
+      }
+    });
+    
+    toast.info('PDF export cancelled');
   };
 
   const formatPlaybookText = () => {
@@ -144,7 +176,8 @@ Tags: ${entry.tags.join(', ')}`;
     }
 
     setIsExporting(true);
-    toast.loading('Preparing PDF…');
+    setShowCancelExport(true);
+    const loadingToast = toast.loading('Preparing PDF… Click Cancel if it takes too long.');
 
     try {
       // Clone the playbook card HTML
@@ -215,21 +248,42 @@ Tags: ${entry.tags.join(', ')}`;
       // Wait a short time to render styles/images
       await new Promise(resolve => setTimeout(resolve, 500));
 
+      // Set up a timeout to auto-cancel after 30 seconds
+      exportTimeoutRef.current = setTimeout(() => {
+        if (isExporting) {
+          handleCancelExport();
+          toast.error('PDF export timed out. Please try again.');
+        }
+      }, 30000);
+
       // Use onafterprint for UX feedback
-      window.onafterprint = () => {
-        toast.success('PDF ready. Check your saved location!');
+      const cleanup = () => {
+        toast.dismiss(loadingToast);
         setIsExporting(false);
-        window.onafterprint = null; // cleanup
-        document.body.removeChild(iframe); // remove iframe safely
+        setShowCancelExport(false);
+        
+        if (exportTimeoutRef.current) {
+          clearTimeout(exportTimeoutRef.current);
+        }
+        
+        // Remove iframe
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
       };
+
+      iframe.contentWindow?.addEventListener('afterprint', cleanup);
+      window.addEventListener('beforeunload', cleanup);
 
       // Trigger print dialog
       iframe.contentWindow?.print();
 
     } catch (err) {
       console.error('Failed to export:', err);
-      toast.error('Failed to open print dialog');
+      toast.dismiss(loadingToast);
       setIsExporting(false);
+      setShowCancelExport(false);
+      toast.error('Failed to open print dialog');
     }
   };
 
@@ -643,7 +697,18 @@ Tags: ${entry.tags.join(', ')}`;
                   )}
                 </Button>
               )}
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
+                {showCancelExport && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-rose-600 border-rose-200 hover:bg-rose-50"
+                    onClick={handleCancelExport}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel Export
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="sm"
