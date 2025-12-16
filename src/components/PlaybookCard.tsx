@@ -132,8 +132,44 @@ Tags: ${entry.tags.join(', ')}`;
       const canvas = await html2canvas(cardRef.current, {
         scale: 2,
         useCORS: true,
+        allowTaint: true,
         logging: false,
         backgroundColor: '#ffffff',
+        foreignObjectRendering: false,
+        onclone: (clonedDoc) => {
+          const styleSheets = clonedDoc.styleSheets;
+          for (let i = 0; i < styleSheets.length; i++) {
+            try {
+              const sheet = styleSheets[i];
+              if (sheet.cssRules) {
+                for (let j = sheet.cssRules.length - 1; j >= 0; j--) {
+                  try {
+                    const rule = sheet.cssRules[j];
+                    if (rule instanceof CSSStyleRule && rule.cssText.includes('oklch')) {
+                      sheet.deleteRule(j);
+                    }
+                  } catch (e) {
+                  }
+                }
+              }
+            } catch (e) {
+            }
+          }
+
+          const clonedElement = clonedDoc.querySelector('[data-slot="card"]');
+          if (clonedElement instanceof HTMLElement) {
+            const inlineComputedStyles = (element: HTMLElement) => {
+              const computed = window.getComputedStyle(element);
+              element.style.cssText = computed.cssText;
+              Array.from(element.children).forEach((child) => {
+                if (child instanceof HTMLElement) {
+                  inlineComputedStyles(child);
+                }
+              });
+            };
+            inlineComputedStyles(clonedElement);
+          }
+        },
       });
 
       const imgData = canvas.toDataURL('image/png');
