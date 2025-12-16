@@ -287,7 +287,7 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
                   disabled={loading || !formData.title || !formData.summary}
                   className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 hover:from-blue-700 hover:via-indigo-700 hover:to-blue-700 text-white min-w-[240px] shadow-xl shadow-blue-500/30 rounded-full h-14 text-lg font-semibold transition-all hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/40 disabled:opacity-50 disabled:hover:scale-100 group overflow-hidden"
                 >
-                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></span>
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-grey/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></span>
                   <Sparkles className="w-5 h-5 mr-2 animate-pulse" />
                   Generate Playbook with AI
                   <Wand2 className="w-5 h-5 ml-2" />
