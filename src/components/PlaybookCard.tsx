@@ -135,13 +135,9 @@ Tags: ${entry.tags.join(', ')}`;
     }
   };
 
- const handleExport = () => {
-  toast.loading("Preparing PDF…")
-
-  window.onafterprint = () => {
-    toast.success("PDF saved. Check your desktop or chosen folder.")
-    window.onafterprint = null
-  }
+  const handleExport = async () => {
+    if (!cardRef.current) {
+      toast.error('Failed to export playbook');
       return;
     }
 
