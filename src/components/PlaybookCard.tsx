@@ -142,111 +142,111 @@ Tags: ${entry.tags.join(', ')}`;
     }
 
     setIsExporting(true);
-    toast.info('Generating PDF...');
+    toast.info('Opening print dialog...');
 
     try {
-      // Clone the element to avoid modifying the original
-      const clonedElement = cardRef.current.cloneNode(true) as HTMLElement;
-      
-      // Set fixed dimensions to ensure consistent rendering
-      clonedElement.style.width = `${cardRef.current.offsetWidth}px`;
-      clonedElement.style.height = 'auto';
-      clonedElement.style.position = 'fixed';
-      clonedElement.style.left = '-9999px';
-      clonedElement.style.top = '0';
-      
-      // Hide interactive elements that shouldn't be in PDF
-      const buttons = clonedElement.querySelectorAll('button');
-      buttons.forEach(button => {
-        button.style.display = 'none';
+      // Clone the preview DOM using outerHTML
+      const clonedHTML = cardRef.current.outerHTML;
+
+      // Create a hidden iframe
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.top = '-9999px';
+      iframe.style.left = '-9999px';
+      iframe.style.width = '210mm'; // A4 width
+      iframe.style.height = '297mm'; // A4 height
+      document.body.appendChild(iframe);
+
+      // Wait for iframe to be ready
+      await new Promise<void>((resolve) => {
+        iframe.onload = () => resolve();
+        if (!iframe.contentDocument) {
+          iframe.onload = () => resolve();
+        } else {
+          resolve();
+        }
       });
 
-      document.body.appendChild(clonedElement);
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iframeDoc) {
+        throw new Error('Failed to access iframe document');
+      }
 
-      // Force browser to compute styles before html2canvas
-      const allElements = clonedElement.querySelectorAll('*');
-      allElements.forEach((el) => {
-        const htmlEl = el as HTMLElement;
-        const computedStyle = window.getComputedStyle(htmlEl);
-        
-        // Convert oklch and other modern color formats to rgb
-        const colorProps = [
-          'color', 'background-color', 'border-color', 
-          'border-top-color', 'border-right-color', 
-          'border-bottom-color', 'border-left-color',
-          'background'
-        ];
-        
-        colorProps.forEach(prop => {
-          try {
-            const value = computedStyle.getPropertyValue(prop);
-            if (value && value.includes('oklch(')) {
-              // For oklch, use computed value (browser converts to rgb)
-              htmlEl.style.setProperty(prop, computedStyle.getPropertyValue(prop));
-            }
-          } catch (e) {
-            // Continue if there's an error with a specific property
+      // Collect all stylesheets from the main document
+      const styleSheets = Array.from(document.styleSheets);
+      let allStyles = '';
+
+      styleSheets.forEach((sheet) => {
+        try {
+          if (sheet.href) {
+            // External stylesheet - create link tag
+            allStyles += `<link rel="stylesheet" href="${sheet.href}">`;
+          } else if (sheet.cssRules) {
+            // Inline stylesheet - extract rules
+            const rules = Array.from(sheet.cssRules)
+              .map((rule) => rule.cssText)
+              .join('\n');
+            allStyles += `<style>${rules}</style>`;
           }
-        });
-
-        // Ensure gradients are properly handled
-        const background = computedStyle.background;
-        if (background && background.includes('gradient')) {
-          // Use computed background that browser has converted
-          htmlEl.style.background = computedStyle.background;
+        } catch (e) {
+          // Skip stylesheets we can't access (CORS)
+          console.warn('Could not access stylesheet:', e);
         }
       });
 
-      // Give browser a moment to apply styles
-      await new Promise(resolve => setTimeout(resolve, 50));
-
-      const canvas = await html2canvas(clonedElement, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false,
-        useCORS: true,
-        allowTaint: true,
-        imageTimeout: 15000,
-        ignoreElements: (el) => {
-          return el.classList?.contains('gradient-ignore') || 
-                 el.tagName === 'BUTTON' ||
-                 el.classList?.contains('animate-in');
-        },
-        onclone: (clonedDoc) => {
-          // Remove any remaining interactive elements
-          const interactive = clonedDoc.querySelectorAll('button, input, textarea');
-          interactive.forEach(el => el.remove());
-          
-          // Ensure all text is visible
-          const allText = clonedDoc.querySelectorAll('*');
-          allText.forEach(el => {
-            const htmlEl = el as HTMLElement;
-            const style = window.getComputedStyle(htmlEl);
-            if (style.color === 'transparent' || style.opacity === '0') {
-              htmlEl.style.color = '#000000';
-              htmlEl.style.opacity = '1';
+      // Add print CSS for exact color printing
+      const printCSS = `
+        <style>
+          @media print {
+            * {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
             }
-          });
-        }
-      });
-      
-      // Remove the cloned element
-      document.body.removeChild(clonedElement);
+            body {
+              margin: 0;
+              padding: 20px;
+            }
+            button {
+              display: none !important;
+            }
+          }
+        </style>
+      `;
 
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
-        unit: 'px',
-        format: [canvas.width, canvas.height],
-      });
+      // Build the complete HTML document for the iframe
+      iframeDoc.open();
+      iframeDoc.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Playbook - ${entry.title}</title>
+            ${allStyles}
+            ${printCSS}
+          </head>
+          <body>
+            ${clonedHTML}
+          </body>
+        </html>
+      `);
+      iframeDoc.close();
 
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-      pdf.save(`playbook-${entry.title.toLowerCase().replace(/\s+/g, '-')}.pdf`);
+      // Wait for styles and images to load
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      toast.success('Playbook exported as PDF!');
+      // Trigger print dialog
+      iframe.contentWindow?.print();
+
+      // Clean up: remove iframe after print dialog closes
+      // Use a longer delay to ensure print dialog has time to render
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+      }, 1000);
+
+      toast.success('Print dialog opened!');
     } catch (err) {
       console.error('Failed to export:', err);
-      toast.error('Failed to export playbook');
+      toast.error('Failed to open print dialog');
     } finally {
       setIsExporting(false);
     }
