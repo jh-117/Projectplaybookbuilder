@@ -292,38 +292,52 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
                 <Button variant="ghost" onClick={onCancel} className="text-gray-500 hover:text-gray-900 sm:w-auto">
                   Cancel
                 </Button>
-                    <Button
-  onClick={generateCard}
-  disabled={loading || !formData.title || !formData.summary || (formData.category === 'Other' && !formData.customCategory)}
-  className="
-    relative
-    bg-white text-black
-    hover:bg-gradient-to-r hover:from-blue-600 hover:via-indigo-600 hover:to-blue-600 hover:text-white
-    min-w-[240px] h-14 rounded-full
-    shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/40
-    text-lg font-semibold
-    transition-all duration-300
-    disabled:opacity-50 disabled:hover:scale-100
-    group overflow-hidden
-  "
->
-  {/* overlay stays behind */}
-  <span className="
-    absolute inset-0
-    bg-gradient-to-r from-transparent via-white/20 to-transparent
-    translate-x-[-100%] group-hover:translate-x-[100%]
-    transition-transform duration-1000
-    z-0
-  "></span>
 
-  {/* content sits above overlay */}
-  <span className="relative z-10 flex items-center justify-center">
-    <Sparkles className="w-5 h-5 mr-2 animate-pulse" />
-    Generate Playbook with AI
-    <Wand2 className="w-5 h-5 ml-2" />
-  </span>
-</Button>
+                <div className="relative group/wrapper">
+                  {/* Animated glow ring */}
+                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-violet-600 to-blue-600 rounded-full opacity-70 group-hover/wrapper:opacity-100 blur-lg group-hover/wrapper:blur-xl transition-all duration-500 animate-pulse"></div>
 
+                  <Button
+                    onClick={generateCard}
+                    disabled={loading || !formData.title || !formData.summary || (formData.category === 'Other' && !formData.customCategory)}
+                    className="
+                      relative
+                      bg-gradient-to-r from-blue-600 via-violet-600 to-blue-600
+                      hover:from-blue-700 hover:via-violet-700 hover:to-blue-700
+                      text-white
+                      min-w-[280px] h-16 rounded-full
+                      shadow-2xl shadow-blue-500/50
+                      text-lg font-bold tracking-wide
+                      transition-all duration-300
+                      hover:scale-105 hover:shadow-blue-600/60
+                      disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed
+                      group overflow-hidden
+                      border-2 border-white/20
+                    "
+                  >
+                    {/* Animated gradient overlay */}
+                    <span className="
+                      absolute inset-0
+                      bg-gradient-to-r from-transparent via-white/30 to-transparent
+                      translate-x-[-200%] group-hover:translate-x-[200%]
+                      transition-transform duration-1000 ease-in-out
+                    "></span>
+
+                    {/* Sparkle particles */}
+                    <span className="absolute top-2 left-8 w-1 h-1 bg-white rounded-full animate-ping opacity-75"></span>
+                    <span className="absolute bottom-3 right-12 w-1 h-1 bg-white rounded-full animate-ping opacity-75 animation-delay-300"></span>
+                    <span className="absolute top-4 right-20 w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+
+                    {/* Button content */}
+                    <span className="relative z-10 flex items-center justify-center gap-2">
+                      <Sparkles className="w-5 h-5 animate-pulse group-hover:rotate-12 transition-transform duration-300" />
+                      <span className="bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent font-extrabold">
+                        Generate Playbook with AI
+                      </span>
+                      <Wand2 className="w-5 h-5 group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300" />
+                    </span>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

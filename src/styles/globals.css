@@ -187,3 +187,14 @@
 html {
   font-size: var(--font-size);
 }
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}
