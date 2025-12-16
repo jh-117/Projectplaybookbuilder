@@ -107,31 +107,37 @@ Tags: ${entry.tags.join(', ')}`;
   };
 
   const handleShare = async () => {
-    const shareData = {
-      title: `Playbook: ${entry.title}`,
-      text: formatPlaybookText(),
-    };
-
     try {
-      if (navigator.share) {
+      const playbookData = {
+        id: entry.id,
+        title: entry.title,
+        industry: entry.industry,
+        category: entry.category,
+      };
+
+      const encodedData = btoa(JSON.stringify(playbookData));
+      const shareUrl = `${window.location.origin}${window.location.pathname}?playbook=${encodedData}`;
+
+      const shareData = {
+        title: `Playbook: ${entry.title}`,
+        text: `Check out this playbook: ${entry.title}`,
+        url: shareUrl,
+      };
+
+      if (navigator.share && navigator.canShare?.(shareData)) {
         await navigator.share(shareData);
-        toast.success('Playbook shared successfully!');
+        toast.success('Playbook link shared successfully!');
       } else {
-        await navigator.clipboard.writeText(formatPlaybookText());
-        toast.info('Content copied to clipboard (Share not supported on this device)');
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success('Shareable link copied to clipboard!');
       }
     } catch (err) {
       if ((err as Error).name === 'AbortError') {
         return;
       }
 
-      try {
-        await navigator.clipboard.writeText(formatPlaybookText());
-        toast.info('Content copied to clipboard');
-      } catch (clipboardErr) {
-        console.error('Error sharing:', err);
-        toast.error('Failed to share playbook');
-      }
+      console.error('Error sharing:', err);
+      toast.error('Failed to share playbook');
     }
   };
 
