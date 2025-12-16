@@ -29,15 +29,16 @@ export default function App() {
 
   const [currentView, setCurrentView] = useState<View>('dashboard');
   const [selectedEntry, setSelectedEntry] = useState<PlaybookEntry | null>(null);
+  const [previousView, setPreviousView] = useState<View>('dashboard');
 
   // If no industry selected, show landing
   if (!selectedIndustry) {
     return (
-      <IndustryLanding 
+      <IndustryLanding
         onSelect={(ind) => {
           setSelectedIndustry(ind);
           setCurrentView('dashboard');
-        }} 
+        }}
       />
     );
   }
@@ -48,6 +49,7 @@ export default function App() {
   };
 
   const handleViewEntry = (entry: PlaybookEntry) => {
+    setPreviousView(currentView);
     setSelectedEntry(entry);
     setCurrentView('view-entry');
   };
@@ -110,15 +112,17 @@ export default function App() {
 
       {currentView === 'view-entry' && selectedEntry && (
         <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <Button 
-            variant="ghost" 
-            onClick={() => handleNavigate('dashboard')} 
+          <Button
+            variant="ghost"
+            onClick={() => handleNavigate(previousView)}
             className="group gap-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 pl-2 pr-4"
           >
             <div className="bg-white border border-gray-200 rounded-full p-1 group-hover:border-indigo-200 transition-colors">
                <ArrowLeft className="w-4 h-4" />
             </div>
-            <span className="font-medium">Back to Dashboard</span>
+            <span className="font-medium">
+              Back to {previousView === 'library' ? 'Library' : previousView === 'my-entries' ? 'My Entries' : 'Dashboard'}
+            </span>
           </Button>
           
           <PlaybookCard
