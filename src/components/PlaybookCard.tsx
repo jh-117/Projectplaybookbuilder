@@ -129,36 +129,90 @@ Tags: ${entry.tags.join(', ')}`;
     toast.info('Generating PDF...');
 
     try {
-      const canvas = await html2canvas(cardRef.current, {
+      // Create a clone of the element and replace oklch colors
+      const element = cardRef.current;
+      const clone = element.cloneNode(true) as HTMLElement;
+      
+      // Create a temporary container
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-9999px';
+      container.style.top = '-9999px';
+      container.style.width = element.offsetWidth + 'px';
+      container.style.backgroundColor = '#ffffff';
+      container.appendChild(clone);
+      document.body.appendChild(container);
+
+      // Remove oklch colors from the cloned element
+      const removeOklchColors = (node: HTMLElement) => {
+        // Handle inline styles
+        const style = node.style;
+        if (style.cssText) {
+          // Replace oklch colors in inline styles with safe fallbacks
+          let cssText = style.cssText;
+          cssText = cssText.replace(/oklch\([^)]+\)/g, (match) => {
+            // Try to parse the oklch color
+            const matchResult = match.match(/oklch\(([\d.]+)%\s+([\d.]+)\s+([\d.]+)\)/);
+            if (matchResult) {
+              const [_, l, c, h] = matchResult;
+              // Convert to approximate hex colors based on common patterns
+              if (l > '80') return '#f8fafc'; // light colors
+              if (l > '60') return '#e2e8f0'; // medium-light
+              if (l > '40') return '#94a3b8'; // medium
+              return '#475569'; // dark
+            }
+            return '#000000'; // fallback
+          });
+          node.style.cssText = cssText;
+        }
+
+        // Handle computed styles for common color properties
+        const computed = window.getComputedStyle(element);
+        const colorProps = ['color', 'backgroundColor', 'borderColor', 'borderTopColor', 
+                          'borderBottomColor', 'borderLeftColor', 'borderRightColor',
+                          'background', 'border'];
+        
+        colorProps.forEach(prop => {
+          const value = computed.getPropertyValue(prop);
+          if (value && value.includes('oklch')) {
+            // Set fallback colors
+            if (prop.includes('background')) {
+              node.style[prop as any] = '#ffffff';
+            } else if (prop.includes('border')) {
+              node.style[prop as any] = '#e2e8f0';
+            } else if (prop === 'color') {
+              node.style[prop as any] = '#000000';
+            }
+          }
+        });
+
+        // Process children
+        for (const child of Array.from(node.children)) {
+          if (child instanceof HTMLElement) {
+            removeOklchColors(child);
+          }
+        }
+      };
+
+      removeOklchColors(clone);
+
+      // Add explicit styling to ensure proper rendering
+      clone.style.boxSizing = 'border-box';
+      clone.style.width = element.offsetWidth + 'px';
+
+      const canvas = await html2canvas(clone, {
         scale: 2,
         useCORS: true,
-        allowTaint: true,
-        logging: false,
         backgroundColor: '#ffffff',
-        onclone: (clonedDoc) => {
-          // Replace all oklch colors with RGB equivalents
-          const allElements = clonedDoc.querySelectorAll('*');
-          allElements.forEach((element) => {
-            if (element instanceof HTMLElement) {
-              const computed = window.getComputedStyle(element);
-              const props = ['color', 'backgroundColor', 'borderColor', 'borderTopColor', 'borderBottomColor', 'borderLeftColor', 'borderRightColor'];
-              
-              props.forEach(prop => {
-                const value = computed.getPropertyValue(prop);
-                if (value && value.includes('oklch')) {
-                  // Get the actual computed RGB value
-                  const tempDiv = document.createElement('div');
-                  tempDiv.style[prop as any] = value;
-                  document.body.appendChild(tempDiv);
-                  const rgbValue = window.getComputedStyle(tempDiv).getPropertyValue(prop);
-                  document.body.removeChild(tempDiv);
-                  element.style[prop as any] = rgbValue;
-                }
-              });
-            }
-          });
-        },
+        logging: false,
+        width: element.offsetWidth,
+        height: element.offsetHeight,
+        windowWidth: element.offsetWidth,
+        windowHeight: element.offsetHeight,
       });
+
+      // Clean up
+      document.body.removeChild(container);
 
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
