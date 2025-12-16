@@ -286,7 +286,8 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
   variant="ghost"
   onClick={generateCard}
   disabled={loading || !formData.title || !formData.summary}
-  className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600
+  className="relative isolate
+             bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600
              hover:from-blue-700 hover:via-indigo-700 hover:to-blue-700
              text-white min-w-[240px] shadow-xl shadow-blue-500/30
              rounded-full h-14 text-lg font-semibold
