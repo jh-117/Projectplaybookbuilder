@@ -3,11 +3,27 @@ import { PlaybookEntry } from '../types';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
-import { CheckCircle2, XCircle, AlertTriangle, FileText, Share2, Copy, Edit2, Download, Save, X, Lightbulb, ShieldAlert, ArrowRight, Globe, Lock } from 'lucide-react';
 import { cn } from './ui/utils';
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import {
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  FileText,
+  Share2,
+  Copy,
+  Edit2,
+  Download,
+  Save,
+  X,
+  Lightbulb,
+  ShieldAlert,
+  ArrowRight,
+  Globe,
+  Lock
+} from 'lucide-react';
 
 interface Props {
   entry: PlaybookEntry;
@@ -129,46 +145,49 @@ Tags: ${entry.tags.join(', ')}`;
     toast.info('Generating PDF...');
 
     try {
+      // Get all computed styles from the original document first
+      const originalElements = cardRef.current.querySelectorAll('*');
+      const computedStyles = new Map();
+      
+      originalElements.forEach((element) => {
+        if (element instanceof HTMLElement) {
+          const computed = window.getComputedStyle(element);
+          computedStyles.set(element, {
+            color: computed.color,
+            backgroundColor: computed.backgroundColor,
+            borderColor: computed.borderColor,
+            borderTopColor: computed.borderTopColor,
+            borderRightColor: computed.borderRightColor,
+            borderBottomColor: computed.borderBottomColor,
+            borderLeftColor: computed.borderLeftColor,
+          });
+        }
+      });
+
       const canvas = await html2canvas(cardRef.current, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         logging: false,
         backgroundColor: '#ffffff',
-        foreignObjectRendering: false,
         onclone: (clonedDoc) => {
-          const styleSheets = clonedDoc.styleSheets;
-          for (let i = 0; i < styleSheets.length; i++) {
-            try {
-              const sheet = styleSheets[i];
-              if (sheet.cssRules) {
-                for (let j = sheet.cssRules.length - 1; j >= 0; j--) {
-                  try {
-                    const rule = sheet.cssRules[j];
-                    if (rule instanceof CSSStyleRule && rule.cssText.includes('oklch')) {
-                      sheet.deleteRule(j);
-                    }
-                  } catch (e) {
+          const clonedElements = clonedDoc.querySelectorAll('*');
+          const originalElementsArray = Array.from(originalElements);
+          
+          clonedElements.forEach((clonedElement, index) => {
+            if (clonedElement instanceof HTMLElement) {
+              const originalElement = originalElementsArray[index];
+              const styles = computedStyles.get(originalElement);
+              
+              if (styles) {
+                Object.entries(styles).forEach(([prop, value]) => {
+                  if (value) {
+                    clonedElement.style[prop as any] = value;
                   }
-                }
+                });
               }
-            } catch (e) {
             }
-          }
-
-          const clonedElement = clonedDoc.querySelector('[data-slot="card"]');
-          if (clonedElement instanceof HTMLElement) {
-            const inlineComputedStyles = (element: HTMLElement) => {
-              const computed = window.getComputedStyle(element);
-              element.style.cssText = computed.cssText;
-              Array.from(element.children).forEach((child) => {
-                if (child instanceof HTMLElement) {
-                  inlineComputedStyles(child);
-                }
-              });
-            };
-            inlineComputedStyles(clonedElement);
-          }
+          });
         },
       });
 
