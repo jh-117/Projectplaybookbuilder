@@ -1,6 +1,6 @@
 import React from 'react';
 import { Industry, INDUSTRIES } from '../types';
-import { Briefcase, Building, Stethoscope, Landmark, HardHat, GraduationCap, Megaphone, Server, ArrowRight } from 'lucide-react';
+import { Briefcase, Building, Stethoscope, Landmark, HardHat, GraduationCap, Megaphone, Server, ArrowRight, ShoppingCart, Factory, Scale, TrendingUp, Headphones, Package, Home, Plane, Film, Flag } from 'lucide-react';
 import { cn } from './ui/utils';
 import kadoshLogo from '../assets/kadoshAI.png';
 import BackgroundMusic from './BackgroundMusic';
@@ -19,6 +19,16 @@ const icons: Record<Industry, React.ReactNode> = {
   "Construction": <HardHat className="w-8 h-8" />,
   "Marketing": <Megaphone className="w-8 h-8" />,
   "Education": <GraduationCap className="w-8 h-8" />,
+  "Retail & E-commerce": <ShoppingCart className="w-8 h-8" />,
+  "Manufacturing": <Factory className="w-8 h-8" />,
+  "Legal & Compliance": <Scale className="w-8 h-8" />,
+  "Sales": <TrendingUp className="w-8 h-8" />,
+  "Customer Service": <Headphones className="w-8 h-8" />,
+  "Product Management": <Package className="w-8 h-8" />,
+  "Real Estate": <Home className="w-8 h-8" />,
+  "Hospitality & Tourism": <Plane className="w-8 h-8" />,
+  "Media & Entertainment": <Film className="w-8 h-8" />,
+  "Government & Public Sector": <Flag className="w-8 h-8" />,
 };
 
 const gradients: Record<Industry, string> = {
@@ -28,8 +38,18 @@ const gradients: Record<Industry, string> = {
   "Operations & Logistics": "from-slate-500 to-gray-500",
   "Healthcare": "from-red-500 to-pink-500",
   "Construction": "from-yellow-500 to-orange-500",
-  "Marketing": "from-purple-500 to-indigo-500",
-  "Education": "from-sky-500 to-indigo-500",
+  "Marketing": "from-rose-500 to-pink-500",
+  "Education": "from-sky-500 to-blue-500",
+  "Retail & E-commerce": "from-violet-500 to-purple-500",
+  "Manufacturing": "from-zinc-500 to-slate-500",
+  "Legal & Compliance": "from-amber-600 to-yellow-600",
+  "Sales": "from-green-500 to-emerald-500",
+  "Customer Service": "from-cyan-500 to-teal-500",
+  "Product Management": "from-fuchsia-500 to-pink-500",
+  "Real Estate": "from-lime-500 to-green-500",
+  "Hospitality & Tourism": "from-blue-400 to-cyan-400",
+  "Media & Entertainment": "from-red-500 to-orange-500",
+  "Government & Public Sector": "from-stone-600 to-gray-600",
 };
 
 export const IndustryLanding: React.FC<Props> = ({ onSelect }) => {
