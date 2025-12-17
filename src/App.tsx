@@ -14,7 +14,7 @@ import { Button } from './components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Toaster } from 'sonner';
 
-type View = 'dashboard' | 'new' | 'library' | 'my-entries' | 'view-entry' | 'privacy-policy';
+type View = 'landing' | 'dashboard' | 'new' | 'library' | 'my-entries' | 'view-entry' | 'privacy-policy';
 
 export default function App() {
   const {
@@ -28,13 +28,13 @@ export default function App() {
     togglePublish
   } = useStore();
 
-  const [currentView, setCurrentView] = useState<View>('dashboard');
+  const [currentView, setCurrentView] = useState<View>('landing');
   const [selectedEntry, setSelectedEntry] = useState<PlaybookEntry | null>(null);
-  const [previousView, setPreviousView] = useState<View>('dashboard');
+  const [previousView, setPreviousView] = useState<View>('landing');
 
   // Handle Privacy Policy navigation
   const handlePrivacyPolicyClick = () => {
-    // Only set previousView if we're not already on privacy policy
+    console.log('Privacy policy clicked, current view:', currentView);
     if (currentView !== 'privacy-policy') {
       setPreviousView(currentView);
     }
@@ -42,29 +42,21 @@ export default function App() {
   };
 
   const handlePrivacyPolicyBack = () => {
+    console.log('Going back to:', previousView);
     setCurrentView(previousView);
   };
 
   const handleHomeClick = () => {
-    setCurrentView('dashboard');
+    if (selectedIndustry) {
+      setCurrentView('dashboard');
+    } else {
+      setCurrentView('landing');
+    }
   };
 
-  // If no industry selected, show landing
-  if (!selectedIndustry) {
-    return (
-      <IndustryLanding
-        onSelect={(ind) => {
-          setSelectedIndustry(ind);
-          setCurrentView('dashboard');
-        }}
-        onPrivacyPolicyClick={handlePrivacyPolicyClick}
-      />
-    );
-  }
-
-  const handleNavigate = (view: View) => {
+  const handleNavigate = (view: Exclude<View, 'landing' | 'privacy-policy'>) => {
     setCurrentView(view);
-    if (view !== 'view-entry' && view !== 'privacy-policy') setSelectedEntry(null);
+    if (view !== 'view-entry') setSelectedEntry(null);
   };
 
   const handleViewEntry = (entry: PlaybookEntry) => {
@@ -87,102 +79,122 @@ export default function App() {
 
   const libraryEntries = [...entries, ...MOCK_LIBRARY];
 
-  return (
-    <>
-      <Toaster position="top-right" richColors />
-      
-      {/* Show Privacy Policy when currentView is 'privacy-policy' */}
-      {currentView === 'privacy-policy' ? (
+  // Show Privacy Policy
+  if (currentView === 'privacy-policy') {
+    return (
+      <>
+        <Toaster position="top-right" richColors />
         <PrivacyPolicy 
           onBack={handlePrivacyPolicyBack}
           onHomeClick={handleHomeClick}
         />
-      ) : (
-        // Show the main app layout for all other views
-        <Layout
-          currentIndustry={selectedIndustry}
-          onIndustryChange={(ind) => {
+      </>
+    );
+  }
+
+  // Show landing page if no industry selected or explicitly on landing view
+  if (!selectedIndustry || currentView === 'landing') {
+    return (
+      <>
+        <Toaster position="top-right" richColors />
+        <IndustryLanding
+          onSelect={(ind) => {
             setSelectedIndustry(ind);
-            handleNavigate('dashboard');
+            setCurrentView('dashboard');
           }}
-          currentView={currentView === 'view-entry' ? 'dashboard' : currentView}
-          onNavigate={handleNavigate}
           onPrivacyPolicyClick={handlePrivacyPolicyClick}
-        >
-          {currentView === 'dashboard' && (
-            <Dashboard
-              industry={selectedIndustry}
-              entries={entries}
-              onViewEntry={handleViewEntry}
-              onNewEntry={() => handleNavigate('new')}
-            />
-          )}
+        />
+      </>
+    );
+  }
 
-          {currentView === 'new' && (
-            <EntryForm 
-              industry={selectedIndustry}
-              onSave={handleSaveEntry}
-              onCancel={() => handleNavigate('dashboard')}
-            />
-          )}
+  // Show main app with Layout
+  return (
+    <>
+      <Toaster position="top-right" richColors />
+      <Layout
+        currentIndustry={selectedIndustry}
+        onIndustryChange={(ind) => {
+          setSelectedIndustry(ind);
+          handleNavigate('dashboard');
+        }}
+        currentView={currentView === 'view-entry' ? 'dashboard' : currentView}
+        onNavigate={handleNavigate}
+        onPrivacyPolicyClick={handlePrivacyPolicyClick}
+      >
+        {currentView === 'dashboard' && (
+          <Dashboard
+            industry={selectedIndustry}
+            entries={entries}
+            onViewEntry={handleViewEntry}
+            onNewEntry={() => handleNavigate('new')}
+          />
+        )}
 
-          {currentView === 'library' && (
-            <Library 
-              entries={libraryEntries}
-              currentIndustry={selectedIndustry}
-              onViewEntry={handleViewEntry}
-            />
-          )}
+        {currentView === 'new' && (
+          <EntryForm 
+            industry={selectedIndustry}
+            onSave={handleSaveEntry}
+            onCancel={() => handleNavigate('dashboard')}
+          />
+        )}
 
-          {currentView === 'my-entries' && (
-            <MyEntries 
-              entries={entries}
-              onViewEntry={handleViewEntry}
-              onDeleteEntry={deleteEntry}
-            />
-          )}
+        {currentView === 'library' && (
+          <Library 
+            entries={libraryEntries}
+            currentIndustry={selectedIndustry}
+            onViewEntry={handleViewEntry}
+          />
+        )}
 
-          {currentView === 'view-entry' && selectedEntry && (
-            <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <Button
-                variant="ghost"
-                onClick={() => handleNavigate(previousView)}
-                className="group gap-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 pl-2 pr-4"
-              >
-                <div className="bg-white border border-gray-200 rounded-full p-1 group-hover:border-indigo-200 transition-colors">
-                   <ArrowLeft className="w-4 h-4" />
-                </div>
-                <span className="font-medium">
-                  Back to {previousView === 'library' ? 'Library' : previousView === 'my-entries' ? 'My Entries' : 'Dashboard'}
-                </span>
-              </Button>
-              
-              <PlaybookCard
-                entry={selectedEntry}
-                onStatusChange={
-                  entries.some(e => e.id === selectedEntry.id)
-                    ? async (status) => await updateEntry(selectedEntry.id, { status })
-                    : undefined
-                }
-                onSave={
-                  entries.some(e => e.id === selectedEntry.id)
-                    ? async (updatedEntry) => {
-                        await updateEntry(updatedEntry.id, updatedEntry);
-                        setSelectedEntry(updatedEntry);
-                      }
-                    : undefined
-                }
-                onPublishToggle={
-                  entries.some(e => e.id === selectedEntry.id)
-                    ? (isPublished) => handlePublishToggle(selectedEntry.id, isPublished)
-                    : undefined
-                }
-                readOnly={!entries.some(e => e.id === selectedEntry.id)}
-              />
-            </div>
-          )}
-        </Layout>
-      )}
+        {currentView === 'my-entries' && (
+          <MyEntries 
+            entries={entries}
+            onViewEntry={handleViewEntry}
+            onDeleteEntry={deleteEntry}
+          />
+        )}
+
+        {currentView === 'view-entry' && selectedEntry && (
+          <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <Button
+              variant="ghost"
+              onClick={() => handleNavigate(previousView as any)}
+              className="group gap-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 pl-2 pr-4"
+            >
+              <div className="bg-white border border-gray-200 rounded-full p-1 group-hover:border-indigo-200 transition-colors">
+                 <ArrowLeft className="w-4 h-4" />
+              </div>
+              <span className="font-medium">
+                Back to {previousView === 'library' ? 'Library' : previousView === 'my-entries' ? 'My Entries' : 'Dashboard'}
+              </span>
+            </Button>
+            
+            <PlaybookCard
+              entry={selectedEntry}
+              onStatusChange={
+                entries.some(e => e.id === selectedEntry.id)
+                  ? async (status) => await updateEntry(selectedEntry.id, { status })
+                  : undefined
+              }
+              onSave={
+                entries.some(e => e.id === selectedEntry.id)
+                  ? async (updatedEntry) => {
+                      await updateEntry(updatedEntry.id, updatedEntry);
+                      setSelectedEntry(updatedEntry);
+                    }
+                  : undefined
+              }
+              onPublishToggle={
+                entries.some(e => e.id === selectedEntry.id)
+                  ? (isPublished) => handlePublishToggle(selectedEntry.id, isPublished)
+                  : undefined
+              }
+              readOnly={!entries.some(e => e.id === selectedEntry.id)}
+            />
+          </div>
+        )}
+      </Layout>
     </>
   );
 }
