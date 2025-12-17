@@ -7,14 +7,14 @@ import { EntryForm } from './components/EntryForm';
 import { Library } from './components/Library';
 import { MyEntries } from './components/MyEntries';
 import { PlaybookCard } from './components/PlaybookCard';
-import PrivacyPolicy from './components/PrivacyPolicy'; // Add this import
+import PrivacyPolicy from './components/PrivacyPolicy';
 import { MOCK_LIBRARY } from './data/mockLibrary';
 import { PlaybookEntry, Industry } from './types';
 import { Button } from './components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Toaster } from 'sonner';
 
-type View = 'dashboard' | 'new' | 'library' | 'my-entries' | 'view-entry' | 'privacy-policy'; // Add 'privacy-policy'
+type View = 'dashboard' | 'new' | 'library' | 'my-entries' | 'view-entry' | 'privacy-policy';
 
 export default function App() {
   const {
@@ -57,7 +57,7 @@ export default function App() {
           setSelectedIndustry(ind);
           setCurrentView('dashboard');
         }}
-        onPrivacyPolicyClick={handlePrivacyPolicyClick} // Pass the handler
+        onPrivacyPolicyClick={handlePrivacyPolicyClick}
       />
     );
   }
@@ -107,7 +107,7 @@ export default function App() {
           }}
           currentView={currentView === 'view-entry' ? 'dashboard' : currentView}
           onNavigate={handleNavigate}
-          onPrivacyPolicyClick={handlePrivacyPolicyClick} // Pass the handler
+          onPrivacyPolicyClick={handlePrivacyPolicyClick}
         >
           {currentView === 'dashboard' && (
             <Dashboard
