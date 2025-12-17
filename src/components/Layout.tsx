@@ -2,7 +2,7 @@ import React from 'react';
 import { Industry, INDUSTRIES } from '../types';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { LayoutDashboard, PlusCircle, BookOpen, User, Menu, X } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, BookOpen, User, Menu, X, Shield } from 'lucide-react'; // Add Shield icon
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from './ui/sheet';
 
 interface LayoutProps {
@@ -11,6 +11,7 @@ interface LayoutProps {
   onIndustryChange: (industry: Industry) => void;
   currentView: 'dashboard' | 'new' | 'library' | 'my-entries';
   onNavigate: (view: 'dashboard' | 'new' | 'library' | 'my-entries') => void;
+  onPrivacyPolicyClick: () => void; // Add this prop
 }
 
 export const Layout: React.FC<LayoutProps> = ({
@@ -18,7 +19,8 @@ export const Layout: React.FC<LayoutProps> = ({
   currentIndustry,
   onIndustryChange,
   currentView,
-  onNavigate
+  onNavigate,
+  onPrivacyPolicyClick // Add this
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
@@ -66,6 +68,15 @@ export const Layout: React.FC<LayoutProps> = ({
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Add Privacy Policy Button */}
+            <button
+              onClick={onPrivacyPolicyClick}
+              className="hidden md:flex items-center gap-2 text-gray-600 hover:text-indigo-600 font-medium transition-colors text-sm px-3 py-2 rounded-lg hover:bg-gray-100/50"
+            >
+              <Shield className="w-4 h-4" />
+              Privacy
+            </button>
+            
             <div className="hidden md:block w-52">
               <Select value={currentIndustry} onValueChange={(v) => onIndustryChange(v as Industry)}>
                 <SelectTrigger className="h-9 bg-white/50 border-gray-200 focus:ring-indigo-500/20 hover:bg-white transition-colors">
@@ -124,6 +135,18 @@ export const Layout: React.FC<LayoutProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
+                    
+                    {/* Add Privacy Policy to Mobile Menu */}
+                    <button
+                      onClick={() => {
+                        onPrivacyPolicyClick();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex items-center gap-2 w-full text-sm text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      <Shield className="w-4 h-4" />
+                      Privacy Policy
+                    </button>
                   </div>
 
                   <div className="pt-6 border-t">
