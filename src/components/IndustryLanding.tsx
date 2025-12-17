@@ -103,7 +103,7 @@ export const IndustryLanding: React.FC<Props> = ({ onSelect }) => {
 
             {/* Copyright */}
             <p className="text-sm text-gray-400">
-              © {new Date().getFullYear()} SlideSmith AI. All rights reserved.
+              © {new Date().getFullYear()} Playbook Builder. All rights reserved.
             </p>
           </div>
         </div>
