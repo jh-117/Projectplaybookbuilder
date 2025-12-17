@@ -32,6 +32,7 @@ const gradients: Record<Industry, string> = {
 export const IndustryLanding: React.FC<Props> = ({ onSelect }) => {
   return (
     <div className="min-h-screen bg-gray-50 relative overflow-hidden flex flex-col items-center justify-center p-6 font-sans">
+        <BackgroundMusic src={themeMusic} />
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-indigo-500/10 blur-[100px]" />
