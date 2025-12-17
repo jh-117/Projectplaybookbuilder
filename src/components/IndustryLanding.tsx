@@ -8,6 +8,7 @@ import themeMusic from '../assets/playbook-theme.mp3';
 
 interface Props {
   onSelect: (industry: Industry) => void;
+  onPrivacyPolicyClick: () => void;
 }
 
 const icons: Record<Industry, React.ReactNode> = {
@@ -52,7 +53,7 @@ const gradients: Record<Industry, string> = {
   "Government & Public Sector": "from-stone-600 to-gray-600",
 };
 
-export const IndustryLanding: React.FC<Props> = ({ onSelect }) => {
+export const IndustryLanding: React.FC<Props> = ({ onSelect, onPrivacyPolicyClick }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="flex-grow relative overflow-hidden flex flex-col items-center justify-center p-6 font-sans">
@@ -80,7 +81,7 @@ export const IndustryLanding: React.FC<Props> = ({ onSelect }) => {
               <button
                 key={industry}
                 onClick={() => onSelect(industry)}
-                className="group relative flex flex-col items-center justify-center p-8 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-transparent transition-all duration-300 overflow-hidden text-center"
+                className="group relative flex flex-col items-center justify-center p-8 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-transparent transition-all duration-300 overflow-hidden text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 <div className={`absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-300 bg-gradient-to-br ${gradients[industry]}`} />
                 
@@ -101,14 +102,19 @@ export const IndustryLanding: React.FC<Props> = ({ onSelect }) => {
         </div>
       </div>
 
-      {/* Footer - Added to landing page */}
+      {/* Footer */}
       <footer className="bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex flex-col items-center justify-center space-y-6">
             
             {/* Privacy Policy Link */}
             <div className="text-center">
-              <span className="text-gray-600 font-medium text-base">Privacy Policy</span>
+              <button
+                onClick={onPrivacyPolicyClick}
+                className="text-gray-600 hover:text-indigo-600 font-medium transition-colors text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 rounded px-2 py-1"
+              >
+                Privacy Policy
+              </button>
             </div>
 
             {/* Powered By Section */}
