@@ -4,7 +4,7 @@ import { Briefcase, Building, Stethoscope, Landmark, HardHat, GraduationCap, Meg
 import { cn } from './ui/utils';
 import kadoshLogo from '../assets/kadoshAI.png';
 import BackgroundMusic from './BackgroundMusic';
-import themeMusic from '../assets/trainer-theme.mp3';
+import themeMusic from '../assets/playbook-theme.mp3';
 
 interface Props {
   onSelect: (industry: Industry) => void;
