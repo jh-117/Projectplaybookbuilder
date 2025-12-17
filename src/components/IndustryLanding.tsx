@@ -2,6 +2,9 @@ import React from 'react';
 import { Industry, INDUSTRIES } from '../types';
 import { Briefcase, Building, Stethoscope, Landmark, HardHat, GraduationCap, Megaphone, Server, ArrowRight } from 'lucide-react';
 import { cn } from './ui/utils';
+import kadoshLogo from '../assets/kadoshAI.png';
+import BackgroundMusic from './BackgroundMusic';
+import themeMusic from '../assets/trainer-theme.mp3';
 
 interface Props {
   onSelect: (industry: Industry) => void;
