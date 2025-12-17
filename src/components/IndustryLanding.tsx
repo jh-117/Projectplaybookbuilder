@@ -107,8 +107,13 @@ export const IndustryLanding: React.FC<Props> = ({ onSelect }) => {
           <div className="flex flex-col items-center justify-center space-y-6">
             
             {/* Privacy Policy Link */}
-            <div className="text-center">
-              <span className="text-gray-600 font-medium text-base">Privacy Policy</span>
+             <div className="text-center">
+              <button 
+                onClick={onPrivacyPolicyClick}
+                className="text-gray-600 hover:text-indigo-600 font-medium transition-colors text-base"
+              >
+                Privacy Policy
+              </button>
             </div>
 
             {/* Powered By Section */}
