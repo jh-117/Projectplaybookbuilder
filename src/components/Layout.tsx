@@ -2,7 +2,7 @@ import React from 'react';
 import { Industry, INDUSTRIES } from '../types';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { LayoutDashboard, PlusCircle, BookOpen, User, Menu, X, Shield, HelpCircle } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, BookOpen, User, Menu, X, Shield } from 'lucide-react'; // Add Shield icon
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from './ui/sheet';
 
 interface LayoutProps {
@@ -11,8 +11,7 @@ interface LayoutProps {
   onIndustryChange: (industry: Industry) => void;
   currentView: 'dashboard' | 'new' | 'library' | 'my-entries';
   onNavigate: (view: 'dashboard' | 'new' | 'library' | 'my-entries') => void;
-  onPrivacyPolicyClick: () => void;
-  onHelpClick: () => void;
+  onPrivacyPolicyClick: () => void; // Add this prop
 }
 
 export const Layout: React.FC<LayoutProps> = ({
@@ -21,8 +20,7 @@ export const Layout: React.FC<LayoutProps> = ({
   onIndustryChange,
   currentView,
   onNavigate,
-  onPrivacyPolicyClick,
-  onHelpClick
+  onPrivacyPolicyClick // Add this
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
@@ -70,15 +68,7 @@ export const Layout: React.FC<LayoutProps> = ({
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={onHelpClick}
-              className="hidden md:flex items-center gap-2 text-gray-600 hover:text-indigo-600 font-medium transition-colors text-sm px-3 py-2 rounded-lg hover:bg-gray-100/50"
-              title="Quick Start Guide"
-            >
-              <HelpCircle className="w-4 h-4" />
-              Help
-            </button>
-
+            {/* Add Privacy Policy Button */}
             <button
               onClick={onPrivacyPolicyClick}
               className="hidden md:flex items-center gap-2 text-gray-600 hover:text-indigo-600 font-medium transition-colors text-sm px-3 py-2 rounded-lg hover:bg-gray-100/50"
@@ -145,18 +135,8 @@ export const Layout: React.FC<LayoutProps> = ({
                         </SelectContent>
                       </Select>
                     </div>
-
-                    <button
-                      onClick={() => {
-                        onHelpClick();
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="flex items-center gap-2 w-full text-sm text-gray-600 hover:text-indigo-600 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                      <HelpCircle className="w-4 h-4" />
-                      Quick Start Guide
-                    </button>
-
+                    
+                    {/* Add Privacy Policy to Mobile Menu */}
                     <button
                       onClick={() => {
                         onPrivacyPolicyClick();

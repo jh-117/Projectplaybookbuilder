@@ -1,6 +1,6 @@
 import React from 'react';
 import { Industry, INDUSTRIES } from '../types';
-import { Briefcase, Building, Stethoscope, Landmark, HardHat, GraduationCap, Megaphone, Server, ArrowRight, ShoppingCart, Factory, Scale, TrendingUp, Headphones, Package, Home, Plane, Film, Flag, HelpCircle } from 'lucide-react';
+import { Briefcase, Building, Stethoscope, Landmark, HardHat, GraduationCap, Megaphone, Server, ArrowRight, ShoppingCart, Factory, Scale, TrendingUp, Headphones, Package, Home, Plane, Film, Flag } from 'lucide-react';
 import { cn } from './ui/utils';
 import kadoshLogo from '../assets/kadoshAI.png';
 import BackgroundMusic from './BackgroundMusic';
@@ -9,7 +9,6 @@ import themeMusic from '../assets/playbook-theme.mp3';
 interface Props {
   onSelect: (industry: Industry) => void;
   onPrivacyPolicyClick: () => void;
-  onHelpClick?: () => void;
 }
 
 const icons: Record<Industry, React.ReactNode> = {
@@ -54,22 +53,11 @@ const gradients: Record<Industry, string> = {
   "Government & Public Sector": "from-stone-600 to-gray-600",
 };
 
-export const IndustryLanding: React.FC<Props> = ({ onSelect, onPrivacyPolicyClick, onHelpClick }) => {
+export const IndustryLanding: React.FC<Props> = ({ onSelect, onPrivacyPolicyClick }) => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="flex-grow relative overflow-hidden flex flex-col items-center justify-center p-6 font-sans">
         <BackgroundMusic src={themeMusic} />
-
-        {onHelpClick && (
-          <button
-            onClick={onHelpClick}
-            className="fixed top-6 right-6 z-50 flex items-center gap-2 bg-white hover:bg-indigo-50 text-gray-700 hover:text-indigo-600 font-medium px-4 py-2.5 rounded-full shadow-lg border border-gray-200 hover:border-indigo-200 transition-all hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            title="Quick Start Guide"
-          >
-            <HelpCircle className="w-5 h-5" />
-            <span className="hidden sm:inline">Help</span>
-          </button>
-        )}
         
         {/* Background Decor */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
