@@ -349,18 +349,18 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
           <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-gray-100 shadow-sm sticky top-20 z-10">
             <div>
               <h2 className="text-lg font-bold text-gray-900">Preview Generated Card</h2>
-              <p className="text-xs text-gray-500">Review and edit before saving to library.</p>
+              <p className="text-xs text-gray-500">Review and edit before saving. You can publish later from My Entries.</p>
             </div>
             <div className="flex gap-3">
               <Button variant="outline" onClick={() => setShowPreview(false)}>
                 Back to Edit
               </Button>
-              <Button 
+              <Button
                 className="bg-teal-600 hover:bg-teal-700 text-white shadow-lg shadow-teal-500/20"
                 onClick={() => generatedEntry && onSave(generatedEntry)}
               >
                 <Save className="w-4 h-4 mr-2" />
-                Save to Library
+                Save to My Entries
               </Button>
             </div>
           </div>
