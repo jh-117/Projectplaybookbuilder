@@ -62,10 +62,10 @@ export const Library: React.FC<Props> = ({ entries, currentIndustry, onViewEntry
         <div className="w-full md:w-56 space-y-2">
           <label className="text-sm font-medium text-gray-700 ml-1">Industry</label>
           <Select value={filterIndustry} onValueChange={(v) => { setFilterIndustry(v); setCustomIndustry(''); }}>
-            <SelectTrigger className="h-10 border-gray-200 bg-gray-50/50 focus:bg-white">
+            <SelectTrigger className="h-10 border-gray-200 bg-white focus:bg-white">
               <SelectValue placeholder="All Industries" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               <SelectItem value="All">All Industries</SelectItem>
               {INDUSTRIES.map(i => (
                 <SelectItem key={i} value={i}>{i}</SelectItem>
@@ -86,10 +86,10 @@ export const Library: React.FC<Props> = ({ entries, currentIndustry, onViewEntry
         <div className="w-full md:w-56 space-y-2">
           <label className="text-sm font-medium text-gray-700 ml-1">Category</label>
           <Select value={filterCategory} onValueChange={(v) => { setFilterCategory(v); setCustomCategory(''); }}>
-            <SelectTrigger className="h-10 border-gray-200 bg-gray-50/50 focus:bg-white">
+            <SelectTrigger className="h-10 border-gray-200 bg-white focus:bg-white">
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               <SelectItem value="All">All Categories</SelectItem>
               {CATEGORIES.map(c => (
                 <SelectItem key={c} value={c}>{c}</SelectItem>
@@ -151,7 +151,7 @@ export const Library: React.FC<Props> = ({ entries, currentIndustry, onViewEntry
                   {entry.industry}
                 </span>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${
-                   entry.status === 'Approved' ? 'text-teal-700 bg-teal-50' : 'text-amber-700 bg-amber-50'
+                   entry.status === 'Human Approved' ? 'text-teal-700 bg-teal-50' : 'text-amber-700 bg-amber-50'
                 }`}>
                   {entry.status}
                 </span>

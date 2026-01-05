@@ -20,7 +20,7 @@ const MOCK_SUGGESTIONS: Partial<PlaybookEntry>[] = [
     category: 'Technical Issue',
     summary: 'Standard procedure for reverting cloud infrastructure changes when critical errors are detected during deployment windows.',
     industry: 'IT & Technology',
-    status: 'Approved',
+    status: 'Human Approved',
     lastUpdated: Date.now() - 100000000,
     tags: ['Cloud', 'DevOps', 'Emergency'],
     rootCause: 'Lack of automated rollback testing',
@@ -37,7 +37,7 @@ const MOCK_SUGGESTIONS: Partial<PlaybookEntry>[] = [
     category: 'Compliance',
     summary: 'Best practices for preparing for annual financial audits to reduce findings and team stress levels.',
     industry: 'Finance & Banking',
-    status: 'Approved',
+    status: 'Human Approved',
     lastUpdated: Date.now() - 200000000,
     tags: ['Audit', 'Finance', 'Compliance'],
     rootCause: 'Scattered documentation',
@@ -237,8 +237,8 @@ export const Dashboard: React.FC<Props> = ({ industry, entries, onViewEntry, onN
                       <div className="flex items-start gap-3">
                         <div className={cn(
                           "w-2 h-2 mt-2 rounded-full shrink-0",
-                          entry.status === 'Approved' ? 'bg-teal-500' : 
-                          entry.status === 'Needs Edit' ? 'bg-amber-500' : 'bg-gray-300'
+                          entry.status === 'Human Approved' ? 'bg-teal-500' :
+                          entry.status === 'Needs Review' ? 'bg-amber-500' : 'bg-gray-300'
                         )} />
                         
                         <div className="flex-1 min-w-0">
@@ -250,8 +250,8 @@ export const Dashboard: React.FC<Props> = ({ industry, entries, onViewEntry, onN
                         
                         <span className={cn(
                           "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide",
-                          entry.status === 'Approved' ? 'bg-teal-50 text-teal-700' : 
-                          entry.status === 'Needs Edit' ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-700'
+                          entry.status === 'Human Approved' ? 'bg-teal-50 text-teal-700' :
+                          entry.status === 'Needs Review' ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-700'
                         )}>
                           {entry.status}
                         </span>
@@ -272,7 +272,7 @@ export const Dashboard: React.FC<Props> = ({ industry, entries, onViewEntry, onN
               <h3 className="font-bold text-lg">Pro Tip</h3>
             </div>
             <p className="text-indigo-100 text-sm leading-relaxed mb-4">
-              Approved playbooks are 40% more likely to be reused by other teams. Make sure to complete the "Prevention Checklist" section.
+              Human-approved playbooks are 40% more likely to be reused by other teams. Make sure to complete the "Prevention Checklist" section.
             </p>
             <div className="w-full h-1 bg-white/20 rounded-full overflow-hidden">
                <div className="w-2/3 h-full bg-white/80 rounded-full" />

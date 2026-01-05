@@ -19,7 +19,7 @@ export type Industry =
   | "Government & Public Sector"
   | string;
 
-export type Status = "Draft" | "Needs Edit" | "Approved";
+export type Status = "AI Generated" | "Needs Review" | "Human Approved";
 
 export interface PlaybookEntry {
   id: string;

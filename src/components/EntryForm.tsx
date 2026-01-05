@@ -115,7 +115,7 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
         dateCreated: Date.now(),
         lastUpdated: Date.now(),
         industry: industry,
-        status: 'Draft',
+        status: 'AI Generated',
         title: formData.title,
         category: finalCategory,
         summary: formData.summary,

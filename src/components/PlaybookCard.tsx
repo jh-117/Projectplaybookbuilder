@@ -49,9 +49,9 @@ export const PlaybookCard: React.FC<Props> = ({ entry, onEdit, onStatusChange, o
   }, [entry, isEditing]);
 
   const statusColors = {
-    'Draft': 'bg-gray-100 text-gray-700 border-gray-200',
-    'Needs Edit': 'bg-amber-50 text-amber-700 border-amber-200',
-    'Approved': 'bg-emerald-50 text-emerald-700 border-emerald-200'
+    'AI Generated': 'bg-gray-100 text-gray-700 border-gray-200',
+    'Needs Review': 'bg-amber-50 text-amber-700 border-amber-200',
+    'Human Approved': 'bg-emerald-50 text-emerald-700 border-emerald-200'
   };
 
   const handleSave = () => {
@@ -289,14 +289,14 @@ Tags: ${entry.tags.join(', ')}`;
 
               {!readOnly && (
                 <div className="flex items-center gap-2 self-start md:self-auto">
-                  {entry.status !== 'Approved' && !isEditing && (
-                    <Button 
-                      size="sm" 
+                  {entry.status !== 'Human Approved' && !isEditing && (
+                    <Button
+                      size="sm"
                       className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all"
-                      onClick={() => onStatusChange?.('Approved')}
+                      onClick={() => onStatusChange?.('Human Approved')}
                     >
                       <CheckCircle2 className="w-4 h-4 mr-2" />
-                      Approve
+                      Mark as Approved
                     </Button>
                   )}
                   
