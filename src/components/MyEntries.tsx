@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { PlaybookEntry, Status } from '../types';
+import { PlaybookEntry } from '../types';
 import { Button } from './ui/button';
 import { Tabs, TabsList, TabsTrigger } from './ui/tabs';
-import { FileText, Edit3, CheckCircle2, Trash2, ArrowRight } from 'lucide-react';
+import { FileText, Trash2, ArrowRight, Globe, Lock } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,18 +22,17 @@ interface Props {
   onDeleteEntry: (id: string) => void;
 }
 
+type FilterType = 'All' | 'Published' | 'Unpublished';
+
 export const MyEntries: React.FC<Props> = ({ entries, onViewEntry, onDeleteEntry }) => {
-  const [filterStatus, setFilterStatus] = useState<Status | 'All'>('All');
+  const [filter, setFilter] = useState<FilterType>('All');
 
-  const filtered = entries.filter(e => filterStatus === 'All' || e.status === filterStatus);
-
-  const StatusIcon = ({ status }: { status: Status }) => {
-    switch (status) {
-      case 'Draft': return <FileText className="w-4 h-4 text-gray-500" />;
-      case 'Needs Edit': return <Edit3 className="w-4 h-4 text-amber-500" />;
-      case 'Approved': return <CheckCircle2 className="w-4 h-4 text-teal-500" />;
-    }
-  };
+  const filtered = entries.filter(e => {
+    if (filter === 'All') return true;
+    if (filter === 'Published') return e.isPublished;
+    if (filter === 'Unpublished') return !e.isPublished;
+    return true;
+  });
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
@@ -42,15 +41,15 @@ export const MyEntries: React.FC<Props> = ({ entries, onViewEntry, onDeleteEntry
         <p className="text-gray-500 text-lg">Manage and review your personal contributions.</p>
       </div>
 
-      <Tabs defaultValue="All" className="w-full" onValueChange={(v) => setFilterStatus(v as any)}>
-        <TabsList className="bg-white border border-gray-200 p-1 rounded-xl h-auto w-full md:w-auto grid grid-cols-4 md:inline-flex">
-          {['All', 'Draft', 'Needs Edit', 'Approved'].map((tab) => (
-             <TabsTrigger 
-                key={tab} 
-                value={tab} 
+      <Tabs defaultValue="All" className="w-full" onValueChange={(v) => setFilter(v as FilterType)}>
+        <TabsList className="bg-white border border-gray-200 p-1 rounded-xl h-auto w-full md:w-auto grid grid-cols-3 md:inline-flex">
+          {(['All', 'Published', 'Unpublished'] as const).map((tab) => (
+             <TabsTrigger
+                key={tab}
+                value={tab}
                 className="rounded-lg data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-700 data-[state=active]:shadow-none px-4 py-2 text-sm font-medium transition-all"
              >
-                {tab === 'Needs Edit' ? 'Review' : tab}
+                {tab}
              </TabsTrigger>
           ))}
         </TabsList>
@@ -71,18 +70,21 @@ export const MyEntries: React.FC<Props> = ({ entries, onViewEntry, onDeleteEntry
               key={entry.id}
               className="group bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-100 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6"
             >
-              <div 
-                className="flex-1 cursor-pointer" 
+              <div
+                className="flex-1 cursor-pointer"
                 onClick={() => onViewEntry(entry)}
               >
                 <div className="flex items-center gap-3 mb-2">
                   <div className={cn(
                     "flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full",
-                    entry.status === 'Approved' ? 'bg-teal-50 text-teal-700' : 
-                    entry.status === 'Needs Edit' ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-600'
+                    entry.isPublished ? 'bg-teal-50 text-teal-700' : 'bg-gray-100 text-gray-600'
                   )}>
-                    <StatusIcon status={entry.status} />
-                    {entry.status}
+                    {entry.isPublished ? (
+                      <Globe className="w-3.5 h-3.5" />
+                    ) : (
+                      <Lock className="w-3.5 h-3.5" />
+                    )}
+                    {entry.isPublished ? 'Published' : 'Unpublished'}
                   </div>
                   <span className="text-gray-300 text-xs">•</span>
                   <span className="text-xs text-gray-500 font-medium">{new Date(entry.lastUpdated).toLocaleDateString()}</span>
