@@ -52,19 +52,19 @@ export const QuickGuide: React.FC<Props> = ({ open, onClose, onNavigate }) => {
         4. sm:max-w-4xl & h-[90vh]: Maintains the size/scroll fixes.
         5. [&>button]:hidden: Hides default close button.
       */}
-      <DialogContent className="w-[95vw] sm:max-w-4xl h-[90vh] z-[100] p-0 flex flex-col gap-0 !bg-[#09090b] bg-gradient-to-br from-[#09090b] via-[#111827] to-[#000000] border-2 border-gray-700 overflow-hidden !opacity-100 [&>button]:hidden shadow-2xl">
-        
+      <DialogContent className="w-[95vw] sm:max-w-4xl h-[90vh] z-[101] p-0 flex flex-col gap-0 !bg-[#09090b] bg-gradient-to-br from-[#09090b] via-[#111827] to-[#000000] border-2 border-gray-700 overflow-hidden !opacity-100 [&>button]:hidden shadow-2xl">
+
         {/* Scrollable Container */}
-        <div className="flex-1 overflow-y-auto relative p-6 md:p-8">
-          
+        <div className="flex-1 overflow-y-auto relative p-6 md:p-8 scrollbar-thin">
+
           {/* Custom Sticky Close Button */}
           <div className="sticky top-0 right-0 z-[110] flex justify-end pointer-events-none mb-4 -mt-2">
               <button
                 onClick={onClose}
-                className="pointer-events-auto rounded-full p-2 bg-gray-900/90 backdrop-blur hover:bg-gray-700 border-2 border-gray-600 hover:border-cyan-500 transition-all shadow-lg"
+                className="pointer-events-auto rounded-full p-3 bg-gray-800 hover:bg-gray-700 border-2 border-white/20 hover:border-cyan-400 transition-all shadow-xl"
                 aria-label="Close"
               >
-                <X className="w-6 h-6 text-white" />
+                <X className="w-7 h-7 text-white stroke-[2.5]" />
               </button>
           </div>
 
@@ -122,22 +122,22 @@ export const QuickGuide: React.FC<Props> = ({ open, onClose, onNavigate }) => {
           </div>
 
           {/* Quick Access Section */}
-          <div className="mt-12 pt-8 border-t border-gray-700">
+          <div className="mt-12 pt-8 border-t-2 border-gray-600">
             <h3 className="font-bold text-white mb-6 text-center text-xl md:text-2xl">Quick Access</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
-              <button onClick={() => handleQuickAccess('dashboard')} className="flex flex-col items-center p-4 bg-gray-900/50 rounded-2xl hover:bg-gray-700 border-2 border-cyan-500/50 transition-all cursor-pointer shadow-lg">
+              <button onClick={() => handleQuickAccess('dashboard')} className="flex flex-col items-center p-4 bg-gray-900/80 rounded-2xl hover:bg-gray-700 border-2 border-cyan-500 hover:border-cyan-400 transition-all cursor-pointer shadow-lg">
                 <Search className="w-8 h-8 md:w-10 md:h-10 text-cyan-400 mb-2" />
                 <span className="text-sm font-bold text-white">Search</span>
               </button>
-              <button onClick={() => handleQuickAccess('library')} className="flex flex-col items-center p-4 bg-gray-900/50 rounded-2xl hover:bg-gray-700 border-2 border-cyan-500/50 transition-all cursor-pointer shadow-lg">
+              <button onClick={() => handleQuickAccess('library')} className="flex flex-col items-center p-4 bg-gray-900/80 rounded-2xl hover:bg-gray-700 border-2 border-cyan-500 hover:border-cyan-400 transition-all cursor-pointer shadow-lg">
                 <Library className="w-8 h-8 md:w-10 md:h-10 text-cyan-400 mb-2" />
                 <span className="text-sm font-bold text-white">Library</span>
               </button>
-              <button onClick={() => handleQuickAccess('my-entries')} className="flex flex-col items-center p-4 bg-gray-900/50 rounded-2xl hover:bg-gray-700 border-2 border-cyan-500/50 transition-all cursor-pointer shadow-lg">
+              <button onClick={() => handleQuickAccess('my-entries')} className="flex flex-col items-center p-4 bg-gray-900/80 rounded-2xl hover:bg-gray-700 border-2 border-cyan-500 hover:border-cyan-400 transition-all cursor-pointer shadow-lg">
                 <FolderOpen className="w-8 h-8 md:w-10 md:h-10 text-cyan-400 mb-2" />
                 <span className="text-sm font-bold text-white">My Entries</span>
               </button>
-              <div className="flex flex-col items-center p-4 bg-black/20 rounded-2xl border-2 border-gray-700 opacity-40">
+              <div className="flex flex-col items-center p-4 bg-black/30 rounded-2xl border-2 border-gray-700 opacity-50">
                 <Share2 className="w-8 h-8 md:w-10 md:h-10 text-gray-500 mb-2" />
                 <span className="text-sm font-bold text-gray-500">Export</span>
               </div>
@@ -145,12 +145,12 @@ export const QuickGuide: React.FC<Props> = ({ open, onClose, onNavigate }) => {
           </div>
 
           {/* Pro Tip */}
-          <div className="mt-8 mb-4 bg-gradient-to-r from-amber-600/20 to-orange-600/20 rounded-2xl p-5 max-w-3xl mx-auto shadow-xl border-2 border-orange-500/30">
+          <div className="mt-8 mb-4 bg-gradient-to-r from-amber-600/30 to-orange-600/30 rounded-2xl p-5 max-w-3xl mx-auto shadow-xl border-2 border-orange-500/50">
             <div className="flex items-start gap-4">
-              <Sparkles className="w-6 h-6 text-orange-400 flex-shrink-0 mt-1" />
+              <Sparkles className="w-7 h-7 text-amber-400 flex-shrink-0 mt-1" />
               <div>
                 <h3 className="font-bold text-white mb-1 text-base">Pro Tip</h3>
-                <p className="text-sm text-gray-200 font-medium">
+                <p className="text-sm text-gray-100 font-medium">
                   Be specific in your summaries to help the AI generate more relevant tasks.
                 </p>
               </div>
