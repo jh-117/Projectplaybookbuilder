@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useStore } from './hooks/useStore';
 import { IndustryLanding } from './components/IndustryLanding';
 import { Layout } from './components/Layout';
@@ -8,6 +8,7 @@ import { Library } from './components/Library';
 import { MyEntries } from './components/MyEntries';
 import { PlaybookCard } from './components/PlaybookCard';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import { QuickGuide } from './components/QuickGuide';
 import { MOCK_LIBRARY } from './data/mockLibrary';
 import { PlaybookEntry, Industry } from './types';
 import { Button } from './components/ui/button';
@@ -31,6 +32,23 @@ export default function App() {
   const [currentView, setCurrentView] = useState<View>('landing');
   const [selectedEntry, setSelectedEntry] = useState<PlaybookEntry | null>(null);
   const [previousView, setPreviousView] = useState<View>('landing');
+  const [showQuickGuide, setShowQuickGuide] = useState(false);
+
+  useEffect(() => {
+    const hasSeenGuide = localStorage.getItem('pp_has_seen_guide');
+    if (!hasSeenGuide && selectedIndustry) {
+      setTimeout(() => setShowQuickGuide(true), 800);
+    }
+  }, [selectedIndustry]);
+
+  const handleCloseGuide = () => {
+    setShowQuickGuide(false);
+    localStorage.setItem('pp_has_seen_guide', 'true');
+  };
+
+  const handleHelpClick = () => {
+    setShowQuickGuide(true);
+  };
 
   // Handle Privacy Policy navigation
   const handlePrivacyPolicyClick = () => {
@@ -97,12 +115,14 @@ export default function App() {
     return (
       <>
         <Toaster position="top-right" richColors />
+        <QuickGuide open={showQuickGuide} onClose={handleCloseGuide} />
         <IndustryLanding
           onSelect={(ind) => {
             setSelectedIndustry(ind);
             setCurrentView('dashboard');
           }}
           onPrivacyPolicyClick={handlePrivacyPolicyClick}
+          onHelpClick={handleHelpClick}
         />
       </>
     );
@@ -112,6 +132,7 @@ export default function App() {
   return (
     <>
       <Toaster position="top-right" richColors />
+      <QuickGuide open={showQuickGuide} onClose={handleCloseGuide} />
       <Layout
         currentIndustry={selectedIndustry}
         onIndustryChange={(ind) => {
@@ -121,6 +142,7 @@ export default function App() {
         currentView={currentView === 'view-entry' ? 'dashboard' : currentView}
         onNavigate={handleNavigate}
         onPrivacyPolicyClick={handlePrivacyPolicyClick}
+        onHelpClick={handleHelpClick}
       >
         {currentView === 'dashboard' && (
           <Dashboard

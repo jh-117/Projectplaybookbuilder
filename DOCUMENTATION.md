@@ -62,9 +62,9 @@
 
 ### 1. Landing Page Flow
 ```
-User Arrives → Selects Industry → Enters Dashboard
-                     ↓
-              Privacy Policy (optional)
+User Arrives → Quick Guide (first-time) → Selects Industry → Enters Dashboard
+                     ↓                           ↓
+              Privacy Policy (optional)    Quick Guide (auto-shows)
 ```
 
 **Industry Selection**:
@@ -72,6 +72,7 @@ User Arrives → Selects Industry → Enters Dashboard
 - Each industry has unique icons and color gradients
 - Selection persists in localStorage
 - Background music player available
+- Help button available for accessing Quick Start Guide anytime
 
 ### 2. Dashboard Flow
 ```
@@ -215,6 +216,22 @@ Library → Apply Filters → View Results → Select Entry → View Details
 - **Audio**: Custom playbook theme music
 - **Persistence**: Music state not persisted
 
+#### 10. Quick Start Guide
+- **First-Time Experience**: Automatically shows for new users after selecting industry
+- **Trigger**: Shows 800ms after industry selection (first-time only)
+- **Accessibility**: Help button in header (both desktop and mobile)
+- **Content**:
+  - Step-by-step walkthrough (4 main steps)
+  - Industry selection guidance
+  - Entry creation process
+  - AI generation explanation
+  - Key features overview
+  - Pro tips and best practices
+- **Persistence**: Once viewed, doesn't show automatically (stored in localStorage)
+- **Manual Access**: Click "Help" button in navigation anytime
+- **Design**: Modal dialog with visual step indicators and color-coded sections
+- **Mobile Friendly**: Responsive design with scrollable content
+
 ---
 
 ## Database Schema
@@ -354,11 +371,15 @@ CREATE TABLE playbook_entries (
 ### Component Hierarchy
 ```
 App
+├── QuickGuide (Modal)
 ├── IndustryLanding
+│   ├── Help Button
 │   ├── BackgroundMusic
 │   └── Footer
 ├── Layout
 │   ├── Header
+│   │   ├── Help Button
+│   │   └── Privacy Button
 │   └── Navigation
 ├── Dashboard
 │   ├── Hero Section
@@ -424,8 +445,19 @@ App
 
 #### Layout.tsx
 - **Purpose**: Wrapper providing navigation and header
-- **Props**: currentIndustry, onIndustryChange, currentView, onNavigate
-- **Features**: Navigation menu, industry selector, privacy policy link
+- **Props**: currentIndustry, onIndustryChange, currentView, onNavigate, onPrivacyPolicyClick, onHelpClick
+- **Features**: Navigation menu, industry selector, privacy policy link, help button
+
+#### QuickGuide.tsx
+- **Purpose**: Interactive tutorial modal for first-time users
+- **Props**: open (boolean), onClose (function)
+- **Features**:
+  - 4-step walkthrough with visual indicators
+  - Color-coded sections for each step
+  - Key features overview with icons
+  - Pro tips section
+  - Responsive design with scrollable content
+  - First-time auto-display with localStorage tracking
 
 ---
 
@@ -640,6 +672,40 @@ App
   2. Select different industry
   3. Verify dashboard updates
 - **Expected**: Dashboard reloads with new industry context
+
+#### TC019: Quick Guide - First-Time User
+- **Status**: ✅ PASS
+- **Steps**:
+  1. Clear localStorage
+  2. Navigate to landing page
+  3. Select any industry
+  4. Wait for guide to appear
+- **Expected**: Quick Start Guide modal appears after 800ms
+
+#### TC020: Quick Guide - Manual Access
+- **Status**: ✅ PASS
+- **Steps**:
+  1. Click "Help" button in navigation
+  2. Verify guide modal opens
+  3. Review content
+  4. Click "Got it, let's start!"
+- **Expected**: Guide displays and closes correctly
+
+#### TC021: Quick Guide - Persistence
+- **Status**: ✅ PASS
+- **Steps**:
+  1. View quick guide and close it
+  2. Navigate away and return to dashboard
+  3. Verify guide doesn't auto-show again
+- **Expected**: Guide only auto-shows once per user
+
+#### TC022: Quick Guide - Mobile Access
+- **Status**: ✅ PASS
+- **Steps**:
+  1. Open mobile menu
+  2. Click "Quick Start Guide"
+  3. Verify guide displays correctly on mobile
+- **Expected**: Guide is responsive and readable on mobile
 
 ---
 
