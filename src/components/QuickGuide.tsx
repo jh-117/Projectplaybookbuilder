@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from './ui/dialog';
 import { Button } from './ui/button';
-import { Sparkles, FileText, Library, FolderOpen, Search, Share2, CheckCircle2 } from 'lucide-react';
+import { Sparkles, FileText, Library, FolderOpen, Search, Share2, CheckCircle2, ArrowDown, Edit, PlusCircle, Briefcase } from 'lucide-react';
 
 interface Props {
   open: boolean;
@@ -17,140 +17,103 @@ interface Props {
 export const QuickGuide: React.FC<Props> = ({ open, onClose }) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
             <Sparkles className="w-6 h-6 text-indigo-600" />
             Quick Start Guide
           </DialogTitle>
-          <DialogDescription className="text-base">
-            Learn how to capture lessons learned and create AI-powered playbooks in minutes
+          <DialogDescription className="text-sm">
+            Get started in 4 simple steps
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          <div className="space-y-4">
-            <div className="flex gap-4 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
-              <div className="flex-shrink-0 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold">
-                1
+        <div className="py-6">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="flex flex-col md:flex-row items-center gap-6 w-full">
+              <div className="flex-1 flex flex-col items-center text-center p-6 bg-gradient-to-br from-indigo-50 to-indigo-100/50 rounded-2xl border-2 border-indigo-200 hover:border-indigo-300 transition-all">
+                <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mb-3 shadow-lg">
+                  <Briefcase className="w-8 h-8 text-white" />
+                </div>
+                <div className="text-2xl font-bold text-indigo-600 mb-1">1</div>
+                <h3 className="font-bold text-gray-900 text-lg">Choose Industry</h3>
               </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-gray-900 mb-1 flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-indigo-600" />
-                  Select Your Industry
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Choose your industry on the landing page. This helps tailor recommendations and AI-generated content to your specific field. You can change it anytime from the header.
-                </p>
+
+              <ArrowDown className="w-6 h-6 text-gray-400 rotate-0 md:rotate-[-90deg]" />
+
+              <div className="flex-1 flex flex-col items-center text-center p-6 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl border-2 border-blue-200 hover:border-blue-300 transition-all">
+                <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mb-3 shadow-lg">
+                  <PlusCircle className="w-8 h-8 text-white" />
+                </div>
+                <div className="text-2xl font-bold text-blue-600 mb-1">2</div>
+                <h3 className="font-bold text-gray-900 text-lg">Create Entry</h3>
+                <p className="text-xs text-gray-600 mt-1">Name + Summary</p>
               </div>
             </div>
 
-            <div className="flex gap-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
-              <div className="flex-shrink-0 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                2
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-gray-900 mb-1 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-blue-600" />
-                  Create a New Entry
-                </h3>
-                <p className="text-sm text-gray-600 mb-2">
-                  Click "Start New Entry" from the dashboard. Fill in the incident details:
-                </p>
-                <ul className="text-sm text-gray-600 space-y-1 ml-4">
-                  <li>• <strong>Project Name</strong>: What was the initiative? (minimum 3 characters)</li>
-                  <li>• <strong>Summary</strong>: What happened? Be specific (minimum 20 characters)</li>
-                  <li>• <strong>Category</strong>: Select from predefined options or create custom</li>
-                  <li>• <strong>Root Cause & Impact</strong>: Optional, AI will analyze if left blank</li>
-                </ul>
-              </div>
-            </div>
+            <ArrowDown className="w-6 h-6 text-gray-400" />
 
-            <div className="flex gap-4 p-4 bg-violet-50 rounded-xl border border-violet-100">
-              <div className="flex-shrink-0 w-10 h-10 bg-violet-600 rounded-full flex items-center justify-center text-white font-bold">
-                3
+            <div className="flex flex-col md:flex-row items-center gap-6 w-full">
+              <div className="flex-1 flex flex-col items-center text-center p-6 bg-gradient-to-br from-violet-50 to-violet-100/50 rounded-2xl border-2 border-violet-200 hover:border-violet-300 transition-all">
+                <div className="w-16 h-16 bg-violet-600 rounded-2xl flex items-center justify-center mb-3 shadow-lg">
+                  <Sparkles className="w-8 h-8 text-white" />
+                </div>
+                <div className="text-2xl font-bold text-violet-600 mb-1">3</div>
+                <h3 className="font-bold text-gray-900 text-lg">Generate AI</h3>
+                <p className="text-xs text-gray-600 mt-1">Auto-analyze</p>
               </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-gray-900 mb-1 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-violet-600" />
-                  Generate with AI
-                </h3>
-                <p className="text-sm text-gray-600 mb-2">
-                  Click "Generate Playbook with AI" and watch the magic happen! The AI will:
-                </p>
-                <ul className="text-sm text-gray-600 space-y-1 ml-4">
-                  <li>• Analyze your incident and identify root causes</li>
-                  <li>• Generate actionable recommendations</li>
-                  <li>• Create Do and Don't lists</li>
-                  <li>• Provide a prevention checklist</li>
-                </ul>
-              </div>
-            </div>
 
-            <div className="flex gap-4 p-4 bg-teal-50 rounded-xl border border-teal-100">
-              <div className="flex-shrink-0 w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white font-bold">
-                4
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-gray-900 mb-1 flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-teal-600" />
-                  Review & Save
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Preview your playbook card, make any edits you want, then save it to your library. You can always edit it later!
-                </p>
+              <ArrowDown className="w-6 h-6 text-gray-400 rotate-0 md:rotate-[-90deg]" />
+
+              <div className="flex-1 flex flex-col items-center text-center p-6 bg-gradient-to-br from-teal-50 to-teal-100/50 rounded-2xl border-2 border-teal-200 hover:border-teal-300 transition-all">
+                <div className="w-16 h-16 bg-teal-600 rounded-2xl flex items-center justify-center mb-3 shadow-lg">
+                  <CheckCircle2 className="w-8 h-8 text-white" />
+                </div>
+                <div className="text-2xl font-bold text-teal-600 mb-1">4</div>
+                <h3 className="font-bold text-gray-900 text-lg">Save & Share</h3>
+                <p className="text-xs text-gray-600 mt-1">Edit anytime</p>
               </div>
             </div>
           </div>
 
-          <div className="border-t border-gray-200 pt-6">
-            <h3 className="font-bold text-gray-900 mb-3">Key Features</h3>
-            <div className="grid md:grid-cols-2 gap-3">
-              <div className="flex items-start gap-2 text-sm">
-                <Search className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <strong>Search:</strong> Find playbooks instantly from the dashboard search bar
-                </div>
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <h3 className="font-bold text-gray-900 mb-4 text-center">Quick Access</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="flex flex-col items-center text-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                <Search className="w-8 h-8 text-indigo-600 mb-2" />
+                <span className="text-xs font-semibold text-gray-700">Search</span>
               </div>
-              <div className="flex items-start gap-2 text-sm">
-                <Library className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <strong>Library:</strong> Browse all published playbooks across industries
-                </div>
+              <div className="flex flex-col items-center text-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                <Library className="w-8 h-8 text-blue-600 mb-2" />
+                <span className="text-xs font-semibold text-gray-700">Library</span>
               </div>
-              <div className="flex items-start gap-2 text-sm">
-                <FolderOpen className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <strong>My Entries:</strong> Manage your personal contributions and drafts
-                </div>
+              <div className="flex flex-col items-center text-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                <FolderOpen className="w-8 h-8 text-violet-600 mb-2" />
+                <span className="text-xs font-semibold text-gray-700">My Entries</span>
               </div>
-              <div className="flex items-start gap-2 text-sm">
-                <Share2 className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <strong>Export:</strong> Download playbooks as PDF or copy to clipboard
-                </div>
+              <div className="flex flex-col items-center text-center p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                <Share2 className="w-8 h-8 text-teal-600 mb-2" />
+                <span className="text-xs font-semibold text-gray-700">Export</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-            <h3 className="font-bold text-amber-900 mb-2 flex items-center gap-2">
-              <Sparkles className="w-4 h-4" />
-              Pro Tips
-            </h3>
-            <ul className="text-sm text-amber-900 space-y-1.5">
-              <li>• Be specific in your summaries for better AI-generated recommendations</li>
-              <li>• Use the status system: Draft → Needs Edit → Approved to track quality</li>
-              <li>• Publish entries to the Library to share knowledge with your team</li>
-              <li>• Filter and search the Library to learn from similar incidents</li>
-              <li>• Edit any field after generation to customize the playbook</li>
-            </ul>
+          <div className="mt-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-bold text-amber-900 mb-2">Pro Tip</h3>
+                <p className="text-sm text-amber-900">
+                  Be specific in summaries → Better AI results → Save time
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex justify-end pt-4 border-t border-gray-200">
-          <Button onClick={onClose} className="bg-indigo-600 hover:bg-indigo-700 text-white px-6">
-            Got it, let's start!
+        <div className="flex justify-center pt-4 border-t border-gray-200">
+          <Button onClick={onClose} className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all">
+            Got it! Let's Start
           </Button>
         </div>
       </DialogContent>
