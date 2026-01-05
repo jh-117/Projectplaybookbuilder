@@ -27,8 +27,8 @@ interface Props {
 }
 
 const StepIcon: React.FC<{ children: React.ReactNode, color: string, Icon: React.ElementType }> = ({ children, color, Icon }) => (
-    <div className={`flex flex-col items-center text-center p-6 bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl border-4 ${color} transition-all shadow-xl h-full`}>
-        <div className={`mb-4 rounded-full p-4 md:p-5 bg-gray-950/70 border-2 ${color}/50`}>
+    <div className={`flex flex-col items-center text-center p-6 bg-gradient-to-br from-gray-700 to-gray-900 rounded-3xl border-4 ${color} transition-all shadow-xl h-full`}>
+        <div className={`mb-4 rounded-full p-4 md:p-5 bg-black/50 border-2 ${color}/50`}>
             <Icon className="w-10 h-10 md:w-16 md:h-16 text-white" />
         </div>
         {children}
@@ -45,13 +45,13 @@ export const QuickGuide: React.FC<Props> = ({ open, onClose, onNavigate }) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      {/* FIXES APPLIED:
-         1. 'sm:max-w-4xl': Overrides the default 'sm:max-w-lg' to make it wide enough.
-         2. 'h-[90vh]': Forces the modal to take up 90% of screen height.
-         3. 'flex flex-col': Replaces default 'grid' to allow proper vertical stacking.
-         4. '[&>button]:hidden': Hides the default close button from ui/dialog.tsx so we can use our own sticky one.
+      {/* FIXES:
+         1. Added 'bg-gray-900' as a solid fallback color.
+         2. Changed gradient to 'from-black via-gray-900 to-black' (colors that definitely exist).
+         3. 'sm:max-w-4xl' & 'h-[90vh]' fixes the scrolling/layout issue.
+         4. '[&>button]:hidden' hides the default close button.
       */}
-      <DialogContent className="w-[95vw] sm:max-w-4xl h-[90vh] p-0 flex flex-col gap-0 bg-gradient-to-br from-black via-gray-900 to-gray-950 border-2 border-gray-700 overflow-hidden [&>button]:hidden">
+      <DialogContent className="w-[95vw] sm:max-w-4xl h-[90vh] p-0 flex flex-col gap-0 bg-gray-900 bg-gradient-to-br from-black via-gray-900 to-black border-2 border-gray-700 overflow-hidden [&>button]:hidden">
         
         {/* Scrollable Container */}
         <div className="flex-1 overflow-y-auto relative p-6 md:p-8">
@@ -60,7 +60,7 @@ export const QuickGuide: React.FC<Props> = ({ open, onClose, onNavigate }) => {
           <div className="sticky top-0 right-0 z-50 flex justify-end pointer-events-none mb-4 -mt-2">
               <button
                 onClick={onClose}
-                className="pointer-events-auto rounded-full p-2 bg-gray-800/90 backdrop-blur hover:bg-gray-700 border-2 border-gray-600 hover:border-cyan-500 transition-all shadow-lg"
+                className="pointer-events-auto rounded-full p-2 bg-gray-900/90 backdrop-blur hover:bg-gray-700 border-2 border-gray-600 hover:border-cyan-500 transition-all shadow-lg"
                 aria-label="Close"
               >
                 <X className="w-6 h-6 text-white" />
@@ -86,7 +86,6 @@ export const QuickGuide: React.FC<Props> = ({ open, onClose, onNavigate }) => {
               <h3 className="font-bold text-white text-xl md:text-2xl mb-1">Choose Industry</h3>
             </StepIcon>
 
-            {/* Arrows */}
             <ArrowRight className="hidden md:block absolute top-1/4 left-1/2 -translate-x-1/2 w-10 h-10 text-gray-500 z-10" />
             <ArrowDown className="md:hidden w-8 h-8 text-gray-500 mx-auto" />
 
@@ -97,7 +96,6 @@ export const QuickGuide: React.FC<Props> = ({ open, onClose, onNavigate }) => {
               <p className="text-sm md:text-base text-gray-200">Name + Summary</p>
             </StepIcon>
 
-            {/* Arrows */}
             <div className="hidden md:flex absolute left-0 right-0 top-1/2 -translate-y-1/2 justify-around px-20 pointer-events-none">
               <ArrowDown className="w-10 h-10 text-gray-500" />
               <ArrowDown className="w-10 h-10 text-gray-500" />
@@ -111,7 +109,6 @@ export const QuickGuide: React.FC<Props> = ({ open, onClose, onNavigate }) => {
               <p className="text-sm md:text-base text-gray-200">Auto-analyze</p>
             </StepIcon>
 
-            {/* Arrows */}
             <ArrowRight className="hidden md:block absolute bottom-1/4 left-1/2 -translate-x-1/2 w-10 h-10 text-gray-500 z-10" />
             <ArrowDown className="md:hidden w-8 h-8 text-gray-500 mx-auto" />
             
@@ -124,23 +121,23 @@ export const QuickGuide: React.FC<Props> = ({ open, onClose, onNavigate }) => {
           </div>
 
           {/* Quick Access Section */}
-          <div className="mt-12 pt-8 border-t border-gray-800">
+          <div className="mt-12 pt-8 border-t border-gray-700">
             <h3 className="font-bold text-white mb-6 text-center text-xl md:text-2xl">Quick Access</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
-              <button onClick={() => handleQuickAccess('dashboard')} className="flex flex-col items-center p-4 bg-gray-800/40 rounded-2xl hover:bg-gray-700 border-2 border-cyan-500/50 transition-all cursor-pointer shadow-lg">
+              <button onClick={() => handleQuickAccess('dashboard')} className="flex flex-col items-center p-4 bg-gray-900/50 rounded-2xl hover:bg-gray-700 border-2 border-cyan-500/50 transition-all cursor-pointer shadow-lg">
                 <Search className="w-8 h-8 md:w-10 md:h-10 text-cyan-400 mb-2" />
                 <span className="text-sm font-bold text-white">Search</span>
               </button>
-              <button onClick={() => handleQuickAccess('library')} className="flex flex-col items-center p-4 bg-gray-800/40 rounded-2xl hover:bg-gray-700 border-2 border-cyan-500/50 transition-all cursor-pointer shadow-lg">
+              <button onClick={() => handleQuickAccess('library')} className="flex flex-col items-center p-4 bg-gray-900/50 rounded-2xl hover:bg-gray-700 border-2 border-cyan-500/50 transition-all cursor-pointer shadow-lg">
                 <Library className="w-8 h-8 md:w-10 md:h-10 text-cyan-400 mb-2" />
                 <span className="text-sm font-bold text-white">Library</span>
               </button>
-              <button onClick={() => handleQuickAccess('my-entries')} className="flex flex-col items-center p-4 bg-gray-800/40 rounded-2xl hover:bg-gray-700 border-2 border-cyan-500/50 transition-all cursor-pointer shadow-lg">
+              <button onClick={() => handleQuickAccess('my-entries')} className="flex flex-col items-center p-4 bg-gray-900/50 rounded-2xl hover:bg-gray-700 border-2 border-cyan-500/50 transition-all cursor-pointer shadow-lg">
                 <FolderOpen className="w-8 h-8 md:w-10 md:h-10 text-cyan-400 mb-2" />
                 <span className="text-sm font-bold text-white">My Entries</span>
               </button>
-              <div className="flex flex-col items-center p-4 bg-gray-900/20 rounded-2xl border-2 border-gray-800 opacity-40">
-                <Share2 className="w-8 h-8 md:w-10 md:h-10 text-gray-600 mb-2" />
+              <div className="flex flex-col items-center p-4 bg-black/20 rounded-2xl border-2 border-gray-700 opacity-40">
+                <Share2 className="w-8 h-8 md:w-10 md:h-10 text-gray-500 mb-2" />
                 <span className="text-sm font-bold text-gray-500">Export</span>
               </div>
             </div>
