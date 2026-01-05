@@ -4255,19 +4255,26 @@ html {
 
 /* Custom scrollbar styling for dialog content */
 [data-slot="dialog-content"] *::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 [data-slot="dialog-content"] *::-webkit-scrollbar-track {
-  background: rgba(55, 65, 81, 0.5);
-  border-radius: 4px;
+  background: rgba(31, 41, 55, 0.8);
+  border-radius: 6px;
 }
 
 [data-slot="dialog-content"] *::-webkit-scrollbar-thumb {
-  background: rgba(107, 114, 128, 0.8);
-  border-radius: 4px;
+  background: rgba(107, 114, 128, 0.9);
+  border-radius: 6px;
+  border: 2px solid rgba(31, 41, 55, 0.8);
 }
 
 [data-slot="dialog-content"] *::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.9);
+  background: rgba(156, 163, 175, 1);
+}
+
+/* Firefox scrollbar styling */
+[data-slot="dialog-content"] * {
+  scrollbar-width: thin;
+  scrollbar-color: #6b7280 #374151;
 }
