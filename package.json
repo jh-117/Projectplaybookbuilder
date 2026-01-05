@@ -1,6 +1,7 @@
 {
       "name": "Project Playbook Builder",
       "version": "0.1.0",
+      "type": "module",
       "private": true,
       "dependencies": {
             "@radix-ui/react-accordion": "^1.2.3",
@@ -51,8 +52,12 @@
             "vaul": "^1.1.2"
       },
       "devDependencies": {
+            "@tailwindcss/postcss": "^4.1.18",
             "@types/node": "^20.10.0",
             "@vitejs/plugin-react-swc": "^3.10.2",
+            "autoprefixer": "^10.4.23",
+            "postcss": "^8.5.6",
+            "tailwindcss": "^4.1.18",
             "vite": "6.3.5"
       },
       "scripts": {
