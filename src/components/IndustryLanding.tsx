@@ -88,31 +88,25 @@ export const IndustryLanding: React.FC<Props> = ({ onSelect, onPrivacyPolicyClic
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
             {INDUSTRIES.map((industry) => (
               <button
                 key={industry}
                 onClick={() => onSelect(industry)}
-                className="group relative flex flex-col items-center justify-center p-6 md:p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden text-center focus:outline-none focus:ring-4 focus:ring-white focus:ring-offset-2 min-h-[140px] md:min-h-[160px] transform hover:scale-105"
-                style={{
-                  background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
-                }}
+                className="group relative flex flex-col items-center justify-center p-8 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-transparent transition-all duration-300 overflow-hidden text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${gradients[industry]} opacity-100`} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                <div className="relative z-10 flex flex-col items-center">
-                  <div className="mb-3 md:mb-4 p-3 md:p-4 rounded-xl bg-white/20 backdrop-blur-sm text-white group-hover:scale-110 group-hover:bg-white/30 transition-all duration-300 shadow-lg">
-                    {icons[industry]}
-                  </div>
-
-                  <span className="font-bold text-white text-sm md:text-base leading-tight drop-shadow-lg">
-                    {industry}
-                  </span>
+                <div className={`absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-300 bg-gradient-to-br ${gradients[industry]}`} />
+                
+                <div className={`mb-4 p-4 rounded-xl bg-gray-50 text-gray-600 group-hover:scale-110 group-hover:bg-white group-hover:shadow-md transition-all duration-300 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-br ${gradients[industry]}`}>
+                  {icons[industry]}
                 </div>
-
-                <div className="absolute bottom-3 md:bottom-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-10">
-                  <ArrowRight className="w-5 h-5 text-white drop-shadow-md" />
+                
+                <span className="font-semibold text-gray-900 group-hover:text-black transition-colors">
+                  {industry}
+                </span>
+                
+                <div className="absolute bottom-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                  <ArrowRight className="w-5 h-5 text-gray-400" />
                 </div>
               </button>
             ))}
