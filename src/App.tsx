@@ -115,7 +115,15 @@ export default function App() {
     return (
       <>
         <Toaster position="top-right" richColors />
-        <QuickGuide open={showQuickGuide} onClose={handleCloseGuide} />
+        <QuickGuide
+          open={showQuickGuide}
+          onClose={handleCloseGuide}
+          onNavigate={(view) => {
+            if (selectedIndustry) {
+              handleNavigate(view);
+            }
+          }}
+        />
         <IndustryLanding
           onSelect={(ind) => {
             setSelectedIndustry(ind);
@@ -132,7 +140,11 @@ export default function App() {
   return (
     <>
       <Toaster position="top-right" richColors />
-      <QuickGuide open={showQuickGuide} onClose={handleCloseGuide} />
+      <QuickGuide
+        open={showQuickGuide}
+        onClose={handleCloseGuide}
+        onNavigate={handleNavigate}
+      />
       <Layout
         currentIndustry={selectedIndustry}
         onIndustryChange={(ind) => {
