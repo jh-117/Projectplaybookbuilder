@@ -37,13 +37,24 @@
 
 ### Frontend Technologies
 - **Framework**: React 18.3.1 with TypeScript
-- **Build Tool**: Vite 6.3.5
-- **Styling**: Tailwind CSS with custom design system
-- **UI Components**: Radix UI component library
-- **State Management**: React Hooks (useState, useEffect)
-- **Routing**: Client-side navigation (without react-router)
-- **Icons**: Lucide React
+- **Build Tool**: Vite 6.3.5 with SWC compiler
+- **Styling**: Tailwind CSS 4.1.18 with custom design system
+- **UI Components**: Radix UI component library (comprehensive set)
+  - Accordion, Alert Dialog, Avatar, Badge, Button, Card, Checkbox
+  - Command, Context Menu, Dialog, Dropdown Menu, Form, Input
+  - Label, Menubar, Navigation Menu, Popover, Progress, Radio Group
+  - Scroll Area, Select, Separator, Sheet, Sidebar, Slider, Switch
+  - Table, Tabs, Textarea, Tooltip, and more
+- **State Management**: React Hooks (useState, useEffect, custom useStore hook)
+- **Routing**: Client-side navigation using view state management (no react-router)
+- **Icons**: Lucide React (comprehensive icon set)
 - **Notifications**: Sonner (toast notifications)
+- **PDF Generation**: Browser print API (html2canvas + jspdf packages available)
+- **Utilities**:
+  - class-variance-authority (CVA) for component variants
+  - clsx & tailwind-merge for conditional classes
+  - react-hook-form for form handling
+  - recharts for potential data visualization
 
 ### Backend Technologies
 - **Database**: Supabase (PostgreSQL)
@@ -85,10 +96,16 @@ Dashboard → View Recent Entries
 
 **Dashboard Features**:
 - Hero section with search functionality
-- Recommended playbooks based on industry
-- Recent activity sidebar
+- Recommended playbooks based on industry (or all playbooks if "General" selected)
+- Recent activity sidebar (last 5 entries)
 - Pro tips and statistics
 - Quick access to all sections
+
+**Industry Recommendation Logic**:
+- If "General" industry is selected: Shows all published entries (mixed industries)
+- If specific industry is selected: Shows entries matching that industry
+- Fallback: If no matches for specific industry, shows all entries
+- Limit: Maximum 6 recommended entries displayed
 
 ### 3. Entry Creation Flow
 ```
@@ -128,27 +145,34 @@ Library → Apply Filters → View Results → Select Entry → View Details
 ### Core Features
 
 #### 1. Industry Selection
-- **Location**: Landing page
+- **Location**: Landing page and navigation bar
 - **Function**: Allows users to select their industry context
-- **Industries Supported**:
-  - IT & Technology
-  - Finance & Banking
-  - HR & Recruitment
-  - Operations & Logistics
-  - Healthcare
-  - Construction
-  - Marketing
-  - Education
-  - Retail & E-commerce
-  - Manufacturing
-  - Legal & Compliance
-  - Sales
-  - Customer Service
-  - Product Management
-  - Real Estate
-  - Hospitality & Tourism
-  - Media & Entertainment
-  - Government & Public Sector
+- **Industries Supported** (19 total):
+  - **General** - Cross-industry recommendations, shows all playbooks
+  - IT & Technology - Blue/cyan gradient, Server icon
+  - Finance & Banking - Emerald/teal gradient, Landmark icon
+  - HR & Recruitment - Orange/amber gradient, Briefcase icon
+  - Operations & Logistics - Slate/gray gradient, Building icon
+  - Healthcare - Red/pink gradient, Stethoscope icon
+  - Construction - Yellow/orange gradient, Hard Hat icon
+  - Marketing - Rose/pink gradient, Megaphone icon
+  - Education - Sky/blue gradient, Graduation Cap icon
+  - Retail & E-commerce - Violet/purple gradient, Shopping Cart icon
+  - Manufacturing - Zinc/slate gradient, Factory icon
+  - Legal & Compliance - Amber/yellow gradient, Scale icon
+  - Sales - Green/emerald gradient, Trending Up icon
+  - Customer Service - Cyan/teal gradient, Headphones icon
+  - Product Management - Fuchsia/pink gradient, Package icon
+  - Real Estate - Lime/green gradient, Home icon
+  - Hospitality & Tourism - Blue/cyan gradient, Plane icon
+  - Media & Entertainment - Red/orange gradient, Film icon
+  - Government & Public Sector - Stone/gray gradient, Flag icon
+
+**Industry Dropdown Styling**:
+- Solid white background for readability (not transparent)
+- Applied to both desktop header and mobile menu
+- Hover state changes to light gray (bg-gray-50)
+- Focus state includes indigo ring for accessibility
 
 #### 2. AI-Powered Playbook Generation
 - **Technology**: OpenAI GPT-4o-mini
@@ -366,6 +390,113 @@ CREATE TABLE playbook_entries (
 
 ---
 
+## Design System
+
+### Color Palette
+
+**Primary Colors**:
+- Indigo: Main brand color (indigo-600, indigo-700, indigo-500)
+- Violet: Accent color (violet-600)
+- Gray: Neutral tones (gray-50 to gray-900)
+
+**Industry-Specific Gradients**:
+Each industry has a unique gradient applied on hover states and visual elements.
+
+**Status Colors**:
+- Draft: Gray (slate-500)
+- Needs Review: Orange (orange-500)
+- Human Approved: Green (emerald-500)
+
+**Semantic Colors**:
+- Success: Green (emerald-500, green-500)
+- Warning: Yellow/Orange (amber-500, orange-500)
+- Error: Red (red-500)
+- Info: Blue (sky-500)
+
+### Typography
+
+**Font Family**: System font stack (sans-serif)
+```css
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, ...
+```
+
+**Font Sizes**:
+- Display: 5xl-7xl (48px-72px) for hero headings
+- Heading 1: 3xl-4xl (30px-36px) for main headings
+- Heading 2: 2xl-3xl (24px-30px) for section headings
+- Heading 3: xl-2xl (20px-24px) for subsections
+- Body: base-lg (16px-18px) for main content
+- Small: sm-xs (14px-12px) for captions and labels
+
+**Font Weights**:
+- Extrabold (800): Hero headings
+- Bold (700): Section headings, buttons
+- Semibold (600): Subheadings, labels
+- Medium (500): Navigation, tabs
+- Regular (400): Body text
+
+### Spacing System
+
+Based on Tailwind's default spacing scale (4px increments):
+- Base unit: 4px (space-1)
+- Common spacings: 8px, 12px, 16px, 24px, 32px, 48px
+- Component padding: p-4 to p-8 (16px-32px)
+- Section margins: gap-4 to gap-12 (16px-48px)
+
+### Border Radius
+
+- Small: rounded-lg (8px) - buttons, inputs
+- Medium: rounded-xl (12px) - cards
+- Large: rounded-2xl (16px) - feature cards
+- Circle: rounded-full - avatars, badges, pills
+
+### Shadows
+
+- Small: shadow-sm - subtle elevation
+- Medium: shadow-md - cards
+- Large: shadow-xl - modals, dropdowns
+- Colored: shadow-indigo-500/20 - brand elements
+
+### Animations & Transitions
+
+**Built-in Transitions**:
+- Duration: 200-300ms (standard)
+- Easing: ease-in-out (default)
+- Properties: colors, transform, opacity, shadow
+
+**Custom Animations**:
+- `animate-in` - Fade and slide in elements
+- `fade-in` - Opacity transition
+- `slide-in-from-bottom` - Upward entrance
+- Duration delays: 100ms, 200ms, 300ms for staggered animations
+
+**Hover Effects**:
+- Scale: hover:scale-105, hover:scale-110
+- Shadow: hover:shadow-xl
+- Translate: hover:-translate-y-0.5
+- Background: hover:bg-{color}
+
+### Responsive Breakpoints
+
+- **sm**: 640px and up (small tablets)
+- **md**: 768px and up (tablets)
+- **lg**: 1024px and up (small desktops)
+- **xl**: 1280px and up (large desktops)
+- **2xl**: 1536px and up (extra large screens)
+
+**Mobile-First Approach**: Base styles target mobile, with progressively enhanced layouts for larger screens.
+
+### Accessibility Features
+
+- Focus rings: focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
+- Screen reader text: sr-only class for hidden labels
+- ARIA labels: Implemented on interactive elements
+- Keyboard navigation: Full support for tab navigation
+- Color contrast: WCAG AA compliant (checked for readability)
+- Semantic HTML: Proper heading hierarchy, landmarks
+
+---
+
 ## Component Structure
 
 ### Component Hierarchy
@@ -414,13 +545,46 @@ App
 
 #### IndustryLanding.tsx
 - **Purpose**: Landing page with industry selection
-- **Props**: onSelect, onPrivacyPolicyClick
-- **Features**: Industry cards with icons, gradients, animations
+- **Props**:
+  - `onSelect: (industry: Industry) => void` - Callback when industry selected
+  - `onPrivacyPolicyClick: () => void` - Opens privacy policy
+  - `onHelpClick?: () => void` - Opens quick guide (optional)
+- **Features**:
+  - Industry cards with unique icons and gradients
+  - Background music player with mute toggle
+  - Animated background blur effects
+  - Help button for quick guide access
+  - 2-column (mobile) to 4-column (desktop) responsive grid
+  - Hover effects with scale and shadow transitions
+  - Gradient overlays on hover
+- **State**: None (stateless component)
+- **Assets**:
+  - Logo: src/assets/kadoshAI.png
+  - Music: src/assets/playbook-theme.mp3
 
 #### Dashboard.tsx
 - **Purpose**: Main hub after industry selection
-- **Props**: industry, entries, onViewEntry, onNewEntry
-- **Features**: Search, recommendations, recent activity
+- **Props**:
+  - `industry: Industry` - Current selected industry
+  - `entries: PlaybookEntry[]` - All user entries
+  - `onViewEntry: (entry: PlaybookEntry) => void` - View entry callback
+  - `onNewEntry: () => void` - Navigate to new entry form
+- **State**:
+  - `searchTerm: string` - Real-time search query
+- **Features**:
+  - Hero section with gradient background
+  - Real-time search with dropdown results
+  - Industry-specific recommendations (6 max)
+  - Recent activity sidebar (5 most recent entries)
+  - Pro tips section with icons
+  - Statistics display (entries created, approved count)
+  - Quick action button for creating entries
+- **Search Logic**:
+  - Searches across: title, summary, tags
+  - Case-insensitive matching
+  - Shows results only when search term length > 0
+  - Combines user entries and library entries
+- **Mock Data**: Includes 5 pre-populated library entries for demo
 
 #### EntryForm.tsx
 - **Purpose**: Create new playbook entries
@@ -445,8 +609,30 @@ App
 
 #### Layout.tsx
 - **Purpose**: Wrapper providing navigation and header
-- **Props**: currentIndustry, onIndustryChange, currentView, onNavigate, onPrivacyPolicyClick, onHelpClick
-- **Features**: Navigation menu, industry selector, privacy policy link, help button
+- **Props**:
+  - `children: React.ReactNode` - Page content
+  - `currentIndustry: Industry` - Selected industry
+  - `onIndustryChange: (industry: Industry) => void` - Industry change handler
+  - `currentView: 'dashboard' | 'new' | 'library' | 'my-entries'` - Active view
+  - `onNavigate: (view) => void` - Navigation handler
+  - `onPrivacyPolicyClick: () => void` - Privacy policy handler
+  - `onHelpClick: () => void` - Quick guide handler
+- **State**:
+  - `isMobileMenuOpen: boolean` - Mobile menu sheet state
+- **Features**:
+  - Sticky header with backdrop blur
+  - Desktop navigation tabs (Dashboard, Library, My Entries)
+  - Mobile navigation via Sheet component
+  - Industry selector dropdown (desktop and mobile)
+  - Help and Privacy buttons (desktop only in header, both in mobile menu)
+  - "New Entry" button with icon
+  - Background pattern overlay
+  - Responsive breakpoints (md:, lg:)
+- **Styling**:
+  - Header: White background with 80% opacity + backdrop blur
+  - Active nav item: Indigo background with ring border
+  - Industry dropdown: Solid white background (not transparent)
+  - Mobile menu: Slide-in sheet from right side
 
 #### QuickGuide.tsx
 - **Purpose**: Interactive tutorial modal for first-time users
@@ -458,6 +644,107 @@ App
   - Pro tips section
   - Responsive design with scrollable content
   - First-time auto-display with localStorage tracking
+
+---
+
+## Data Flow & Architecture
+
+### Application State Flow
+
+```
+User Action → Component Event → State Update → Database Sync → UI Re-render
+```
+
+**Example: Creating a New Entry**
+```
+1. User fills form in EntryForm component
+2. User clicks "Generate with AI"
+3. Frontend validates input (title, summary length)
+4. API call to generate-playbook edge function
+5. Edge function validates content with AI
+6. Edge function generates playbook with AI
+7. Response returns to frontend
+8. User reviews preview
+9. User clicks "Save to Library"
+10. createEntry() called from useStore
+11. Entry inserted into Supabase database
+12. Local state updated with new entry
+13. Navigation to entry view
+14. Success toast displayed
+```
+
+**Example: Editing an Entry**
+```
+1. User clicks edit icon on PlaybookCard
+2. Card enters edit mode (inline editing)
+3. User modifies fields
+4. User clicks save icon
+5. updateEntry() called from useStore
+6. Database updated via Supabase
+7. Local state updated
+8. Card exits edit mode
+9. Success toast displayed
+```
+
+### Data Synchronization
+
+**On Application Mount**:
+1. Check localStorage for selected industry
+2. Fetch all entries from database via `getAllEntries()`
+3. Update local state with entries
+4. Set loading state to false
+
+**On Entry Creation**:
+1. Insert to database
+2. Database returns created entry with ID
+3. Add to local state array
+4. Update relevant views
+
+**On Entry Update**:
+1. Update in database by ID
+2. Update local state by ID
+3. Preserve other entries unchanged
+
+**On Entry Delete**:
+1. Delete from database by ID
+2. Remove from local state array
+3. Navigate to previous view if currently viewing deleted entry
+
+### Local Storage Usage
+
+**Key**: `pp_selected_industry`
+- **Type**: string (Industry type)
+- **Purpose**: Persist industry selection across sessions
+- **Read**: On app mount
+- **Write**: On industry change
+
+**Key**: `pp_quick_guide_seen`
+- **Type**: boolean (stored as "true" string)
+- **Purpose**: Track if user has seen quick guide
+- **Read**: On dashboard mount
+- **Write**: When quick guide is closed
+
+### Database Query Patterns
+
+**Common Queries**:
+```typescript
+// Get all entries (ordered)
+.select('*')
+.order('last_updated', { ascending: false })
+
+// Get published entries only
+.select('*')
+.eq('is_published', true)
+.order('last_updated', { ascending: false })
+
+// Update entry
+.update({ ...updates, last_updated: Date.now() })
+.eq('id', id)
+
+// Delete entry
+.delete()
+.eq('id', id)
+```
 
 ---
 
@@ -485,8 +772,46 @@ App
 
 **Persistence**:
 - Industry selection: localStorage (`pp_selected_industry`)
-- Entries: Supabase database
+- Quick guide seen status: localStorage (`pp_quick_guide_seen`)
+- Entries: Supabase database (persisted)
 - Loading on mount: Fetches all entries from database
+
+**Store Implementation Details**:
+```typescript
+// Location: src/hooks/useStore.ts
+export const useStore = () => {
+  const [selectedIndustry, setIndustry] = useState<Industry | null>(null);
+  const [entries, setEntries] = useState<PlaybookEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load industry from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('pp_selected_industry');
+    if (saved) setIndustry(saved as Industry);
+  }, []);
+
+  // Load entries from database on mount
+  useEffect(() => {
+    getAllEntries().then(data => {
+      setEntries(data);
+      setIsLoading(false);
+    });
+  }, []);
+
+  // Industry setter with localStorage sync
+  const setSelectedIndustry = (industry: Industry) => {
+    setIndustry(industry);
+    localStorage.setItem('pp_selected_industry', industry);
+  };
+
+  // CRUD operations...
+}
+```
+
+**State Update Patterns**:
+- **Optimistic Updates**: UI updates immediately, database syncs in background
+- **Error Handling**: Toast notifications on failure, state rollback if needed
+- **Loading States**: Individual loading states for async operations
 
 ### Local Component State
 
@@ -672,6 +997,24 @@ App
   2. Select different industry
   3. Verify dashboard updates
 - **Expected**: Dashboard reloads with new industry context
+
+#### TC018a: General Industry Selection
+- **Status**: ✅ PASS
+- **Steps**:
+  1. Select "General" from industry dropdown
+  2. Verify dashboard shows mixed industry recommendations
+  3. Navigate to library
+  4. Verify all published entries shown (not filtered)
+- **Expected**: "General" shows cross-industry content
+
+#### TC018b: Industry Dropdown Readability
+- **Status**: ✅ PASS
+- **Steps**:
+  1. Click industry dropdown in header
+  2. Verify dropdown has solid white background
+  3. Verify text is clearly readable
+  4. Test on both desktop and mobile
+- **Expected**: Dropdown background is opaque white, text is readable
 
 #### TC019: Quick Guide - First-Time User
 - **Status**: ✅ PASS
@@ -972,6 +1315,171 @@ Toggles published status of entry.
 
 ---
 
+## Mock Library Data
+
+The application includes 5 pre-populated playbook entries for demonstration purposes:
+
+### Mock Entry 1: Data Breach Incident Response
+- **Industry**: IT & Technology
+- **Category**: Risk Management
+- **Status**: Human Approved
+- **Summary**: Major data breach affecting customer PII due to unpatched vulnerability
+- **Key Learning**: Automated patch management prevents security incidents
+
+### Mock Entry 2: Budget Overrun
+- **Industry**: Finance & Banking
+- **Category**: Financial Planning
+- **Status**: Human Approved
+- **Summary**: Project exceeded budget by 40% due to scope creep
+- **Key Learning**: Regular scope reviews and change control processes
+
+### Mock Entry 3: Failed Product Launch
+- **Industry**: Marketing
+- **Category**: Strategic Planning
+- **Status**: Needs Review
+- **Summary**: Product launch failed due to inadequate market research
+- **Key Learning**: Comprehensive market validation before launch
+
+### Mock Entry 4: Construction Delay
+- **Industry**: Construction
+- **Category**: Timeline Management
+- **Status**: Human Approved
+- **Summary**: 6-month delay due to supply chain disruptions
+- **Key Learning**: Multi-supplier sourcing and contingency planning
+
+### Mock Entry 5: High Employee Turnover
+- **Industry**: HR & Recruitment
+- **Category**: Team Management
+- **Status**: Human Approved
+- **Summary**: 30% turnover rate traced to poor onboarding
+- **Key Learning**: Structured onboarding program reduces turnover
+
+**Location**: `src/data/mockLibrary.ts`
+
+**Purpose**:
+- Provides immediate content for new users
+- Demonstrates playbook format and quality
+- Shows industry variety
+- Helps with UI testing and development
+
+---
+
+## File Structure
+
+```
+project-playbook-builder/
+├── public/                          # Static assets
+├── src/
+│   ├── assets/                      # Images, audio, media
+│   │   ├── kadoshAI.png            # Logo image
+│   │   └── playbook-theme.mp3      # Background music
+│   ├── components/                  # React components
+│   │   ├── ui/                     # Radix UI components (30+ files)
+│   │   │   ├── button.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── select.tsx
+│   │   │   └── ...
+│   │   ├── BackgroundMusic.tsx     # Audio player component
+│   │   ├── Dashboard.tsx           # Main dashboard view
+│   │   ├── EntryForm.tsx           # New entry creation form
+│   │   ├── IndustryLanding.tsx     # Landing page
+│   │   ├── Layout.tsx              # App layout wrapper
+│   │   ├── Library.tsx             # Published entries browser
+│   │   ├── MyEntries.tsx           # User entries manager
+│   │   ├── PlaybookCard.tsx        # Entry display/edit card
+│   │   ├── PrivacyPolicy.tsx       # Privacy policy page
+│   │   └── QuickGuide.tsx          # Tutorial modal
+│   ├── data/
+│   │   └── mockLibrary.ts          # Demo library entries
+│   ├── hooks/
+│   │   └── useStore.ts             # Global state management
+│   ├── lib/
+│   │   ├── database.ts             # Supabase CRUD functions
+│   │   └── supabase.ts             # Supabase client setup
+│   ├── styles/
+│   │   └── globals.css             # Global styles, Tailwind imports
+│   ├── App.tsx                     # Root component
+│   ├── index.css                   # Additional global styles
+│   ├── main.tsx                    # Application entry point
+│   └── types.ts                    # TypeScript type definitions
+├── supabase/
+│   ├── functions/
+│   │   └── generate-playbook/
+│   │       └── index.ts            # AI generation edge function
+│   └── migrations/
+│       └── 20251216135033_create_playbook_entries_table.sql
+├── .env                            # Environment variables (gitignored)
+├── .gitignore                      # Git ignore rules
+├── index.html                      # HTML entry point
+├── package.json                    # Dependencies and scripts
+├── postcss.config.js               # PostCSS configuration
+├── tailwind.config.js              # Tailwind CSS configuration
+├── vite.config.ts                  # Vite build configuration
+├── DOCUMENTATION.md                # This file
+└── README.md                       # Project readme
+```
+
+---
+
+## Environment Configuration
+
+### Required Environment Variables
+
+**.env file**:
+```env
+# Supabase Configuration
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key-here
+
+# OpenAI Configuration (for edge function)
+OPENAI_API_KEY=sk-your-openai-key-here
+```
+
+### Obtaining Credentials
+
+**Supabase**:
+1. Create account at https://supabase.com
+2. Create new project
+3. Navigate to Settings → API
+4. Copy Project URL (VITE_SUPABASE_URL)
+5. Copy anon/public key (VITE_SUPABASE_ANON_KEY)
+
+**OpenAI**:
+1. Create account at https://platform.openai.com
+2. Navigate to API Keys
+3. Create new secret key
+4. Copy key (OPENAI_API_KEY)
+5. Add to Supabase edge function secrets:
+   ```bash
+   supabase secrets set OPENAI_API_KEY=sk-your-key
+   ```
+
+### Build Configuration
+
+**vite.config.ts**:
+```typescript
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
+
+export default defineConfig({
+  plugins: [react()],
+  build: {
+    outDir: 'build',
+    sourcemap: false,
+    minify: 'esbuild'
+  }
+})
+```
+
+**Key Settings**:
+- Output directory: `build/`
+- SWC compiler for faster builds
+- ESBuild minification
+- No source maps in production
+
+---
+
 ## Credits & Attribution
 
 - **UI Components**: Radix UI
@@ -996,6 +1504,31 @@ For issues, questions, or contributions, please contact the development team.
 
 ---
 
-**Document Version**: 1.0
-**Last Updated**: December 22, 2024
+**Document Version**: 1.1
+**Last Updated**: January 6, 2026
 **Application Version**: 0.1.0
+
+---
+
+## Changelog
+
+### Version 1.1 (January 6, 2026)
+- Added "General" industry option for cross-industry recommendations
+- Fixed industry dropdown transparency issue (now solid white background)
+- Enhanced documentation with detailed design system section
+- Added comprehensive component props documentation
+- Added data flow and architecture section
+- Added file structure overview
+- Added environment configuration details
+- Added mock library data descriptions
+- Expanded test cases with new industry-related tests
+- Updated last updated date
+
+### Version 1.0 (December 22, 2024)
+- Initial comprehensive documentation
+- Complete feature documentation
+- Database schema documentation
+- API reference
+- Component structure
+- Test cases
+- Setup instructions
