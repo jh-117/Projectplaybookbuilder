@@ -89,10 +89,10 @@ export const Layout: React.FC<LayoutProps> = ({
             
             <div className="hidden md:block w-52">
               <Select value={currentIndustry} onValueChange={(v) => onIndustryChange(v as Industry)}>
-                <SelectTrigger className="h-9 bg-white/50 border-gray-200 focus:ring-indigo-500/20 hover:bg-white transition-colors">
+                <SelectTrigger className="h-9 bg-white border-gray-200 focus:ring-indigo-500/20 hover:bg-gray-50 transition-colors">
                   <SelectValue placeholder="Industry" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   {INDUSTRIES.map((ind) => (
                     <SelectItem key={ind} value={ind} className="cursor-pointer">{ind}</SelectItem>
                   ))}
@@ -135,10 +135,10 @@ export const Layout: React.FC<LayoutProps> = ({
                     <div className="space-y-4">
                       <label className="text-sm text-gray-600">Active Industry</label>
                       <Select value={currentIndustry} onValueChange={(v) => onIndustryChange(v as Industry)}>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full bg-white">
                           <SelectValue placeholder="Industry" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white">
                           {INDUSTRIES.map((ind) => (
                             <SelectItem key={ind} value={ind}>{ind}</SelectItem>
                           ))}

@@ -1,4 +1,5 @@
 export type Industry =
+  | "General"
   | "IT & Technology"
   | "Finance & Banking"
   | "HR & Recruitment"
@@ -46,6 +47,7 @@ export interface PlaybookEntry {
 }
 
 export const INDUSTRIES: string[] = [
+  "General",
   "IT & Technology",
   "Finance & Banking",
   "HR & Recruitment",

@@ -56,12 +56,17 @@ export const Dashboard: React.FC<Props> = ({ industry, entries, onViewEntry, onN
 
   // Get recommendations from published library entries that match the user's industry
   const allLibraryEntries = [...entries.filter(e => e.isPublished), ...MOCK_LIBRARY];
-  const industryMatches = allLibraryEntries.filter(e => e.industry === industry);
 
-  // Show industry matches, or fallback to all published entries if no matches
-  const displaySuggestions = industryMatches.length > 0
-    ? industryMatches.slice(0, 6)
-    : allLibraryEntries.slice(0, 6);
+  // If "General" is selected, show all published entries
+  // Otherwise, filter by industry and fallback to all if no matches
+  const displaySuggestions = industry === 'General'
+    ? allLibraryEntries.slice(0, 6)
+    : (() => {
+        const industryMatches = allLibraryEntries.filter(e => e.industry === industry);
+        return industryMatches.length > 0
+          ? industryMatches.slice(0, 6)
+          : allLibraryEntries.slice(0, 6);
+      })();
 
   const recentEntries = entries.slice(0, 5);
 

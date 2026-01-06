@@ -1,6 +1,6 @@
 import React from 'react';
 import { Industry, INDUSTRIES } from '../types';
-import { Briefcase, Building, Stethoscope, Landmark, HardHat, GraduationCap, Megaphone, Server, ArrowRight, ShoppingCart, Factory, Scale, TrendingUp, Headphones, Package, Home, Plane, Film, Flag, HelpCircle } from 'lucide-react';
+import { Briefcase, Building, Stethoscope, Landmark, HardHat, GraduationCap, Megaphone, Server, ArrowRight, ShoppingCart, Factory, Scale, TrendingUp, Headphones, Package, Home, Plane, Film, Flag, HelpCircle, Globe } from 'lucide-react';
 import { cn } from './ui/utils';
 import kadoshLogo from '../assets/kadoshAI.png';
 import BackgroundMusic from './BackgroundMusic';
@@ -13,6 +13,7 @@ interface Props {
 }
 
 const icons: Record<Industry, React.ReactNode> = {
+  "General": <Globe className="w-8 h-8" />,
   "IT & Technology": <Server className="w-8 h-8" />,
   "Finance & Banking": <Landmark className="w-8 h-8" />,
   "HR & Recruitment": <Briefcase className="w-8 h-8" />,
@@ -34,6 +35,7 @@ const icons: Record<Industry, React.ReactNode> = {
 };
 
 const gradients: Record<Industry, string> = {
+  "General": "from-indigo-500 to-violet-500",
   "IT & Technology": "from-blue-500 to-cyan-500",
   "Finance & Banking": "from-emerald-500 to-teal-500",
   "HR & Recruitment": "from-orange-500 to-amber-500",
