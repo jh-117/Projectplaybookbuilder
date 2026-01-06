@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Search, Sparkles, Clock, ArrowRight, TrendingUp, ShieldCheck, Filter } from 'lucide-react';
 import { cn } from './ui/utils';
+import { MOCK_LIBRARY } from '../data/mockLibrary';
 
 interface Props {
   industry: Industry;
@@ -53,8 +54,15 @@ const MOCK_SUGGESTIONS: Partial<PlaybookEntry>[] = [
 export const Dashboard: React.FC<Props> = ({ industry, entries, onViewEntry, onNewEntry }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const suggestions = MOCK_SUGGESTIONS.filter(s => s.industry === industry || !s.industry);
-  const displaySuggestions = suggestions.length > 0 ? suggestions : MOCK_SUGGESTIONS;
+  // Get recommendations from published library entries that match the user's industry
+  const allLibraryEntries = [...entries.filter(e => e.isPublished), ...MOCK_LIBRARY];
+  const industryMatches = allLibraryEntries.filter(e => e.industry === industry);
+
+  // Show industry matches, or fallback to all published entries if no matches
+  const displaySuggestions = industryMatches.length > 0
+    ? industryMatches.slice(0, 6)
+    : allLibraryEntries.slice(0, 6);
+
   const recentEntries = entries.slice(0, 5);
 
   const allSearchableEntries = [...entries, ...displaySuggestions.map(s => s as PlaybookEntry)];
