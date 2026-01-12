@@ -72,15 +72,36 @@ export const Dashboard: React.FC<Props> = ({ industry, entries, onViewEntry, onN
 
   const allSearchableEntries = [...entries, ...displaySuggestions.map(s => s as PlaybookEntry)];
 
-  const searchResults = searchTerm.trim()
-    ? allSearchableEntries.filter(entry =>
-        entry.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entry.summary?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        entry.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-      )
+  const searchLower = searchTerm.toLowerCase().trim();
+
+  const searchResults = searchLower.length >= 2
+    ? allSearchableEntries
+        .filter(entry =>
+          entry.title?.toLowerCase().includes(searchLower) ||
+          entry.summary?.toLowerCase().includes(searchLower) ||
+          entry.tags?.some(tag => tag.toLowerCase().includes(searchLower)) ||
+          entry.category?.toLowerCase().includes(searchLower)
+        )
+        .sort((a, b) => {
+          const aTitle = a.title?.toLowerCase() || '';
+          const bTitle = b.title?.toLowerCase() || '';
+          const aTitleMatch = aTitle.includes(searchLower);
+          const bTitleMatch = bTitle.includes(searchLower);
+
+          if (aTitleMatch && !bTitleMatch) return -1;
+          if (!aTitleMatch && bTitleMatch) return 1;
+
+          const aTitleStarts = aTitle.startsWith(searchLower);
+          const bTitleStarts = bTitle.startsWith(searchLower);
+
+          if (aTitleStarts && !bTitleStarts) return -1;
+          if (!aTitleStarts && bTitleStarts) return 1;
+
+          return 0;
+        })
     : [];
 
-  const showSearchResults = searchTerm.trim().length > 0;
+  const showSearchResults = searchLower.length >= 2;
 
   return (
     <div className="space-y-12 animate-in fade-in duration-500 pb-12">
