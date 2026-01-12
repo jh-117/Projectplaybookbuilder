@@ -136,9 +136,9 @@ export const Dashboard: React.FC<Props> = ({ industry, entries, onViewEntry, onN
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             {showSearchResults && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-gray-200 max-h-96 overflow-y-auto z-50">
+              <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border-2 border-gray-200 max-h-[32rem] overflow-y-auto z-[100]">
                 {searchResults.length > 0 ? (
-                  <div className="divide-y divide-gray-100">
+                  <div className="divide-y divide-gray-200">
                     {searchResults.slice(0, 10).map((entry) => (
                       <div
                         key={entry.id}
@@ -146,19 +146,19 @@ export const Dashboard: React.FC<Props> = ({ industry, entries, onViewEntry, onN
                           onViewEntry(entry);
                           setSearchTerm('');
                         }}
-                        className="p-4 hover:bg-gray-50 cursor-pointer transition-colors group"
+                        className="p-5 hover:bg-indigo-50 cursor-pointer transition-all group"
                       >
                         <div className="flex items-start gap-3">
                           <div className="flex-1">
-                            <h4 className="text-sm font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
+                            <h4 className="text-base font-bold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-1 mb-1.5">
                               {entry.title}
                             </h4>
-                            <p className="text-xs text-gray-500 mt-1 line-clamp-2">{entry.summary}</p>
-                            <div className="flex gap-2 mt-2">
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 uppercase">
+                            <p className="text-sm text-gray-700 mt-1 line-clamp-2 leading-relaxed">{entry.summary}</p>
+                            <div className="flex gap-2 mt-3">
+                              <span className="text-xs font-bold px-3 py-1 rounded-full bg-gray-200 text-gray-700 uppercase tracking-wide">
                                 {entry.industry}
                               </span>
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 uppercase">
+                              <span className="text-xs font-bold px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 uppercase tracking-wide">
                                 {entry.category}
                               </span>
                             </div>
@@ -168,9 +168,9 @@ export const Dashboard: React.FC<Props> = ({ industry, entries, onViewEntry, onN
                     ))}
                   </div>
                 ) : (
-                  <div className="p-8 text-center">
-                    <Filter className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">No results found for "{searchTerm}"</p>
+                  <div className="p-10 text-center">
+                    <Filter className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+                    <p className="text-base font-medium text-gray-700">No results found for "{searchTerm}"</p>
                   </div>
                 )}
               </div>
