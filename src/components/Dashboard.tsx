@@ -127,11 +127,11 @@ export const Dashboard: React.FC<Props> = ({ industry, entries, onViewEntry, onN
           
           <div className="w-full max-w-xl relative group/search z-50">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
-              <Search className="h-5 w-5 text-indigo-300 group-focus-within/search:text-indigo-500 transition-colors" />
+              <Search className="h-5 w-5 text-gray-500 group-focus-within/search:text-indigo-600 transition-colors" />
             </div>
             <Input
               placeholder="Search playbooks, lessons, or tags..."
-              className="w-full pl-12 py-6 bg-white/10 border-indigo-400/30 text-white placeholder:text-indigo-200/50 rounded-2xl focus:bg-white focus:text-gray-900 focus:placeholder:text-gray-400 focus:ring-0 shadow-lg backdrop-blur-sm transition-all text-lg"
+              className="w-full pl-12 py-6 bg-white/95 border-white/50 text-gray-900 placeholder:text-gray-500 rounded-2xl focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-lg backdrop-blur-sm transition-all text-lg font-medium"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
