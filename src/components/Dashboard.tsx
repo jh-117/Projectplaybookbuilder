@@ -70,7 +70,7 @@ export const Dashboard: React.FC<Props> = ({ industry, entries, onViewEntry, onN
 
   const recentEntries = entries.slice(0, 5);
 
-  const allSearchableEntries = [...entries, ...displaySuggestions.map(s => s as PlaybookEntry)];
+  const allSearchableEntries = [...entries, ...allLibraryEntries];
 
   const searchLower = searchTerm.toLowerCase().trim();
 
