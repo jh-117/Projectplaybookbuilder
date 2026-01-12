@@ -9,6 +9,7 @@ import { MyEntries } from './components/MyEntries';
 import { PlaybookCard } from './components/PlaybookCard';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import { QuickGuide } from './components/QuickGuide';
+import { PrivacyNotice } from './components/PrivacyNotice';
 import { MOCK_LIBRARY } from './data/mockLibrary';
 import { PlaybookEntry, Industry } from './types';
 import { Button } from './components/ui/button';
@@ -102,7 +103,8 @@ export default function App() {
     return (
       <>
         <Toaster position="top-right" richColors />
-        <PrivacyPolicy 
+        <PrivacyNotice />
+        <PrivacyPolicy
           onBack={handlePrivacyPolicyBack}
           onHomeClick={handleHomeClick}
         />
@@ -115,6 +117,7 @@ export default function App() {
     return (
       <>
         <Toaster position="top-right" richColors />
+        <PrivacyNotice />
         <QuickGuide
           open={showQuickGuide}
           onClose={handleCloseGuide}
@@ -140,6 +143,7 @@ export default function App() {
   return (
     <>
       <Toaster position="top-right" richColors />
+      <PrivacyNotice />
       <QuickGuide
         open={showQuickGuide}
         onClose={handleCloseGuide}

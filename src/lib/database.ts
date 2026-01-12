@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { PlaybookEntry } from '../types';
+import { getAnonymousUserId } from './anonymousUser';
 
 export interface DbPlaybookEntry {
   id: string;
@@ -18,6 +19,7 @@ export interface DbPlaybookEntry {
   prevention_checklist: string[];
   tags: string[];
   is_published: boolean;
+  anonymous_user_id: string | null;
 }
 
 function dbToEntry(db: DbPlaybookEntry): PlaybookEntry {
@@ -57,14 +59,18 @@ function entryToDb(entry: PlaybookEntry): Omit<DbPlaybookEntry, 'id'> {
     dont_list: entry.dontList,
     prevention_checklist: entry.preventionChecklist,
     tags: entry.tags,
-    is_published: entry.isPublished
+    is_published: entry.isPublished,
+    anonymous_user_id: getAnonymousUserId()
   };
 }
 
 export async function getAllEntries(): Promise<PlaybookEntry[]> {
+  const anonymousUserId = getAnonymousUserId();
+
   const { data, error } = await supabase
     .from('playbook_entries')
     .select('*')
+    .eq('anonymous_user_id', anonymousUserId)
     .order('last_updated', { ascending: false });
 
   if (error) {
@@ -76,9 +82,12 @@ export async function getAllEntries(): Promise<PlaybookEntry[]> {
 }
 
 export async function getPublishedEntries(): Promise<PlaybookEntry[]> {
+  const anonymousUserId = getAnonymousUserId();
+
   const { data, error } = await supabase
     .from('playbook_entries')
     .select('*')
+    .eq('anonymous_user_id', anonymousUserId)
     .eq('is_published', true)
     .order('last_updated', { ascending: false });
 
@@ -106,6 +115,7 @@ export async function createEntry(entry: PlaybookEntry): Promise<PlaybookEntry |
 }
 
 export async function updateEntry(id: string, updates: Partial<PlaybookEntry>): Promise<PlaybookEntry | null> {
+  const anonymousUserId = getAnonymousUserId();
   const dbUpdates: any = {};
 
   if (updates.title !== undefined) dbUpdates.title = updates.title;
@@ -126,6 +136,7 @@ export async function updateEntry(id: string, updates: Partial<PlaybookEntry>): 
     .from('playbook_entries')
     .update(dbUpdates)
     .eq('id', id)
+    .eq('anonymous_user_id', anonymousUserId)
     .select()
     .maybeSingle();
 
@@ -138,10 +149,13 @@ export async function updateEntry(id: string, updates: Partial<PlaybookEntry>): 
 }
 
 export async function deleteEntry(id: string): Promise<boolean> {
+  const anonymousUserId = getAnonymousUserId();
+
   const { error } = await supabase
     .from('playbook_entries')
     .delete()
-    .eq('id', id);
+    .eq('id', id)
+    .eq('anonymous_user_id', anonymousUserId);
 
   if (error) {
     console.error('Error deleting entry:', error);
