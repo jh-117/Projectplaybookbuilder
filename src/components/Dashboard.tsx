@@ -104,7 +104,7 @@ export const Dashboard: React.FC<Props> = ({ industry, entries, onViewEntry, onN
             </p>
           </div>
           
-          <div className="w-full max-w-xl relative group/search">
+          <div className="w-full max-w-xl relative group/search z-50">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
               <Search className="h-5 w-5 text-indigo-300 group-focus-within/search:text-indigo-500 transition-colors" />
             </div>
