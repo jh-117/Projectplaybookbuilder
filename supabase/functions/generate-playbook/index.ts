@@ -45,9 +45,9 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    if (title.trim().length < 3 || summary.trim().length < 20) {
+    if (title.trim().length < 3 || summary.trim().length < 100) {
       return new Response(
-        JSON.stringify({ error: 'Title and summary must be sufficiently detailed' }),
+        JSON.stringify({ error: 'Title and summary must be sufficiently detailed (minimum 100 characters for summary)' }),
         {
           status: 400,
           headers: {
