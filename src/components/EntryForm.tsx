@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Industry, PlaybookEntry, CATEGORIES } from '../types';
+import { Industry, PlaybookEntry } from '../types';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Card } from './ui/card';
 import { Loader2, Wand2, Save, FileText, AlertTriangle, ArrowRight, ChevronRight, Check, Sparkles } from 'lucide-react';
 import { PlaybookCard } from './PlaybookCard';
@@ -36,8 +35,7 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
 
   const [formData, setFormData] = useState({
     title: '',
-    category: 'Process Improvement',
-    customCategory: '',
+    category: '',
     summary: '',
     rootCause: '',
     impact: '',
@@ -85,8 +83,6 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
     try {
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-playbook`;
 
-      const finalCategory = formData.category === 'Other' ? formData.customCategory : formData.category;
-
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -95,7 +91,7 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
         },
         body: JSON.stringify({
           title: formData.title,
-          category: finalCategory,
+          category: formData.category,
           summary: formData.summary,
           rootCause: formData.rootCause,
           impact: formData.impact,
@@ -117,11 +113,11 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
         industry: industry,
         status: 'AI Generated',
         title: formData.title,
-        category: finalCategory,
+        category: formData.category,
         summary: formData.summary,
         rootCause: generatedContent.rootCause,
         impact: generatedContent.impact,
-        tags: [industry, finalCategory, "AI Generated"],
+        tags: [industry, formData.category, "AI Generated"],
         recommendation: generatedContent.recommendation,
         doList: generatedContent.doList,
         dontList: generatedContent.dontList,
@@ -221,28 +217,12 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
                     </div>
                     <div className="space-y-2">
                       <Label className="text-gray-700">Category</Label>
-                      <Select
+                      <Input
+                        className="bg-gray-50/50 border-gray-200 focus:bg-white transition-all"
+                        placeholder="e.g. Process Improvement, Security, Migration"
                         value={formData.category}
-                        onValueChange={v => setFormData({...formData, category: v, customCategory: ''})}
-                      >
-                        <SelectTrigger className="bg-white border-gray-200">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {CATEGORIES.map(cat => (
-                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                          ))}
-                          <SelectItem value="Other">Other (specify below)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {formData.category === 'Other' && (
-                        <Input
-                          className="bg-gray-50/50 border-gray-200 focus:bg-white transition-all mt-2"
-                          placeholder="Enter custom category..."
-                          value={formData.customCategory}
-                          onChange={e => setFormData({...formData, customCategory: e.target.value})}
-                        />
-                      )}
+                        onChange={e => setFormData({...formData, category: e.target.value})}
+                      />
                     </div>
                  </div>
 
@@ -299,7 +279,7 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
 
                   <Button
   onClick={generateCard}
-  disabled={loading || !formData.title || !formData.summary || (formData.category === 'Other' && !formData.customCategory)}
+  disabled={loading || !formData.title || !formData.summary}
   className="
     relative
     bg-white
