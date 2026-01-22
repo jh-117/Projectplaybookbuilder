@@ -57,15 +57,6 @@ const gradients: Record<Industry, string> = {
 };
 
 export const IndustryLanding: React.FC<Props> = ({ onSelect, onPrivacyPolicyClick, onHelpClick }) => {
-  const [industryInput, setIndustryInput] = React.useState('');
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (industryInput.trim()) {
-      onSelect(industryInput.trim());
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="flex-grow relative overflow-hidden flex flex-col items-center justify-center p-6 font-sans">
@@ -81,51 +72,47 @@ export const IndustryLanding: React.FC<Props> = ({ onSelect, onPrivacyPolicyClic
             <span className="hidden sm:inline">Start Guide</span>
           </button>
         )}
-
+        
         {/* Background Decor */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
           <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-indigo-500/10 blur-[100px]" />
           <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full bg-teal-500/10 blur-[100px]" />
         </div>
 
-        <div className="max-w-2xl w-full z-10 space-y-12">
-          <div className="text-center space-y-6">
+        <div className="max-w-6xl w-full z-10 space-y-12">
+          <div className="text-center space-y-6 max-w-3xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight leading-[1.1] animate-in fade-in slide-in-from-bottom-4 duration-700 delay-100">
               Standardize your <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">lessons learned.</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
-              Enter your industry to begin capturing insights, generating standardized playbooks, and building a resilient organization.
+              Select your industry to begin capturing insights, generating standardized playbooks, and building a resilient organization.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 space-y-6">
-              <div className="space-y-3">
-                <label htmlFor="industry-input" className="block text-lg font-semibold text-gray-900">
-                  What's your industry?
-                </label>
-                <input
-                  id="industry-input"
-                  type="text"
-                  value={industryInput}
-                  onChange={(e) => setIndustryInput(e.target.value)}
-                  placeholder="e.g. IT & Technology, Healthcare, Finance..."
-                  className="w-full px-4 py-3 text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                  autoFocus
-                />
-              </div>
-
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+            {INDUSTRIES.map((industry) => (
               <button
-                type="submit"
-                disabled={!industryInput.trim()}
-                className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                key={industry}
+                onClick={() => onSelect(industry)}
+                className="group relative flex flex-col items-center justify-center p-8 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-transparent transition-all duration-300 overflow-hidden text-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
-                Continue
-                <ArrowRight className="w-5 h-5" />
+                <div className={`absolute inset-0 opacity-0 group-hover:opacity-5 transition-opacity duration-300 bg-gradient-to-br ${gradients[industry]}`} />
+                
+                <div className={`mb-4 p-4 rounded-xl bg-gray-50 text-gray-600 group-hover:scale-110 group-hover:bg-white group-hover:shadow-md transition-all duration-300 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-br ${gradients[industry]}`}>
+                  {icons[industry]}
+                </div>
+                
+                <span className="font-semibold text-gray-900 group-hover:text-black transition-colors">
+                  {industry}
+                </span>
+                
+                <div className="absolute bottom-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                  <ArrowRight className="w-5 h-5 text-gray-400" />
+                </div>
               </button>
-            </div>
-          </form>
+            ))}
+          </div>
         </div>
       </div>
 
