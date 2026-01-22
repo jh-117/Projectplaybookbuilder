@@ -225,7 +225,7 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
                         value={formData.category}
                         onValueChange={v => setFormData({...formData, category: v, customCategory: ''})}
                       >
-                        <SelectTrigger className="bg-gray-50/50 border-gray-200">
+                        <SelectTrigger className="bg-white border-gray-200">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -247,10 +247,10 @@ export const EntryForm: React.FC<Props> = ({ industry, onSave, onCancel }) => {
                  </div>
 
                  <div className="space-y-2">
-                    <Label className="text-gray-700">What Happened? (Summary) <span className="text-red-500">*</span></Label>
+                    <Label className="text-gray-700">What Happened? (Summary) <span className="text-red-500">*</span> <span className="text-xs text-gray-500 font-normal">- minimum 20 characters</span></Label>
                     <Textarea
                       className="min-h-[120px] bg-gray-50/50 border-gray-200 focus:bg-white transition-all resize-y"
-                      placeholder="Describe the incident in detail. For example: 'During our Q4 cloud migration, we experienced 2 hours of downtime due to misconfigured load balancers...' (minimum 20 characters)"
+                      placeholder="Describe the incident in detail. For example: 'During our Q4 cloud migration, we experienced 2 hours of downtime due to misconfigured load balancers...'"
                       value={formData.summary}
                       onChange={e => setFormData({...formData, summary: e.target.value})}
                     />

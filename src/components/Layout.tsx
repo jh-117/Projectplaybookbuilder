@@ -76,7 +76,7 @@ export const Layout: React.FC<LayoutProps> = ({
               title="Quick Start Guide"
             >
               <HelpCircle className="w-4 h-4" />
-              Help
+              Start Guide
             </button>
 
             <button

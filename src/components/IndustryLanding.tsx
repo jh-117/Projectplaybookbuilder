@@ -69,7 +69,7 @@ export const IndustryLanding: React.FC<Props> = ({ onSelect, onPrivacyPolicyClic
             title="Quick Start Guide"
           >
             <HelpCircle className="w-5 h-5" />
-            <span className="hidden sm:inline">Help</span>
+            <span className="hidden sm:inline">Start Guide</span>
           </button>
         )}
         
